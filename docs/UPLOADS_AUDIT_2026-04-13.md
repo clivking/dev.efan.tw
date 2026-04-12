@@ -8,14 +8,14 @@ Audit source:
 - database table: `uploaded_files`
 - runtime check command: `docker exec efan-dev-web node scripts/check-uploads-integrity.mjs`
 
-## Summary
+## Initial Summary
 
 - filesystem files: `344`
 - `uploaded_files` rows: `333`
 - unsupported DB paths: `0`
 - missing file paths on disk: `287`
 
-## What The Result Actually Means
+## What The Initial Result Actually Meant
 
 This does not appear to mean `287` files are truly gone.
 
@@ -44,19 +44,63 @@ Examples showed paths like:
 - DB: `products/...webp`
 - actual file: `products/...jpg`
 
+## Extension Drift Repair
+
+A high-confidence extension-drift repair pass was run on April 13, 2026.
+
+Tool:
+
+- `app-legacy-base/scripts/fix-uploads-extension-drift.mjs`
+
+Result:
+
+- `238` `uploaded_files` rows were repaired
+- these were exact same-basename matches where the DB path extension was wrong but the real file existed on disk
+
+Breakdown:
+
+- `product_website`: `214`
+- `product_content_image`: `20`
+- `product`: `4`
+
+## Post-Repair Summary
+
+After the repair pass:
+
+- unsupported DB paths: `0`
+- missing file paths on disk: `49`
+
+## What The Remaining 49 Most Likely Mean
+
+The remaining rows no longer look like simple extension drift.
+
+Observed patterns:
+
+- legacy product image references with no exact file match
+- product document references that point to URL-encoded Chinese filenames
+- actual filesystem documents often exist only as alternate manual/datasheet naming such as `_DM.pdf`
+
+This means the remaining set likely needs:
+
+- targeted document mapping decisions
+- or true file recovery from backups
+
+It should not be auto-fixed with the same extension-drift rule.
+
 ## Immediate Interpretation
 
 1. uploads governance is now confirmed as a real maintenance area, not just a theoretical one
-2. many image problems are likely repairable by path normalization rather than file recovery
-3. current image health cannot be trusted from DB references alone
+2. the biggest image-path problem was repairable by path normalization rather than file recovery
+3. the remaining file issues are narrower and more semantic
+4. current image/document health still cannot be trusted from DB references alone
 
 ## Recommended Next Action
 
-1. classify missing rows into:
-   - alternate extension exists
+1. classify the remaining `49` rows into:
+   - wrong document mapping
    - truly missing file
-2. repair the alternate-extension cases in batches
-3. only search backups for the truly missing remainder
+2. repair document-path mismatches in a separate pass
+3. only search backups for the true remainder
 
 ## Operational Note
 

@@ -17,6 +17,7 @@ Reduce confusion in `app-legacy-base/scripts` by separating canonical tools from
 
 - `force-reset-user.mjs`
 - `setup-user.mjs`
+- `fix-uploads-extension-drift.mjs`
 - `cleanup-obsolete-settings.ts`
 - `repair-garbled-db.mjs`
 

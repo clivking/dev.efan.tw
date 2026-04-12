@@ -19,6 +19,7 @@
     "lint": "eslint .",
     "script:check-db": "tsx scripts/check-db.ts",
     "script:check-uploads": "node scripts/check-uploads-integrity.mjs",
+    "script:fix-uploads-drift": "node scripts/fix-uploads-extension-drift.mjs",
     "script:test-prisma": "node scripts/test-prisma.mjs",
     "script:reset-user": "node scripts/force-reset-user.mjs",
     "script:setup-user": "node scripts/setup-user.mjs",

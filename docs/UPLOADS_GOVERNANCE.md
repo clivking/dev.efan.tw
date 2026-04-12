@@ -52,6 +52,18 @@ This should verify:
 - referenced files exist on disk
 - likely alternate-extension mismatches are surfaced
 
+For high-confidence extension drift:
+
+```bash
+docker exec efan-dev-web node scripts/fix-uploads-extension-drift.mjs
+docker exec efan-dev-web node scripts/fix-uploads-extension-drift.mjs --apply
+```
+
+Rule:
+
+- run dry-run first
+- only apply exact same-basename alternate-extension repairs with an existing file on disk
+
 Current reference audit:
 
 - `docs/UPLOADS_AUDIT_2026-04-13.md`
