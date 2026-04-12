@@ -1,23 +1,23 @@
 # dev.efan.tw
 
-Clean rebuild workspace for the efan development environment.
+Recovered and stabilized workspace for the efan development environment.
 
 ## Stack
 
 - Next.js
 - TypeScript
-- pnpm
+- npm in `app-legacy-base`
 - PostgreSQL
 - Docker Compose
 - Cloudflare Tunnel
 
 ## Structure
 
-- `app/` application source
+- `app/` early clean-baseline rebuild app kept as reference
+- `app-legacy-base/` recovered working copy that currently powers `dev.efan.tw`
 - `infra/` local and deployment infrastructure files
-- `docs/` rebuild notes and runbooks
+- `docs/` operating notes, cleanup notes, and long-term planning
 - `import-review/` isolated area for backup review
-- `scripts/` repeatable helper scripts
 
 ## Legacy Rule
 
@@ -26,28 +26,29 @@ Clean rebuild workspace for the efan development environment.
 - old code goes into `import-review/code-old/`
 - old database snapshots stay in `import-review/db-old/` and are mounted only when explicitly needed
 
+## Runtime
+
+Current active dev runtime:
+
+- website on local port `5000`
+- PostgreSQL on local port `5433` for the recovered working copy DB
+- Cloudflare Tunnel exposes `https://dev.efan.tw`
+
 ## Local Commands
 
-Inside `app/`:
+Inside `app-legacy-base/`:
 
 ```bash
-pnpm dev
-pnpm lint
-pnpm typecheck
-pnpm build
+npm run dev
+npm run lint
+npm run build
 ```
 
 With Docker:
 
 ```bash
-docker compose up --build
+docker compose -f compose.work-prod.yaml up --build -d
 ```
-
-This starts:
-
-- `web` on local port `5000`
-- `db` on local port `5432`
-- `cloudflared` for `https://dev.efan.tw`
 
 ## Working Rules
 
@@ -55,3 +56,10 @@ This starts:
 - production data moves from `www` down to `pre` and `dev`
 - do not copy whole environments upward
 - review old backups before importing them into the app
+
+## Planning Docs
+
+- `docs/LONG_TERM_MASTERPLAN.md`
+- `docs/EXECUTION_BACKLOG.md`
+- `docs/SETTINGS_ENV_SECRETS_POLICY.md`
+- `docs/WORKING_COPY_CLEANUP.md`

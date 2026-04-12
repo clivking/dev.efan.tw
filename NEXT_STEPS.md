@@ -1,48 +1,30 @@
 # Next Steps
 
-## Milestone 1
+## Current State
 
-Create the clean local baseline for `dev.efan.tw`.
+- `dev.efan.tw` is live from the recovered working copy
+- runtime is image-based and exposed through Cloudflare Tunnel
+- core business features are preserved
+- the current focus is long-term cleanup, governance, and deployment discipline
 
-## Decisions To Make First
+## Current Recommended Sequence
 
-1. app framework
-2. package manager
-3. database engine
-4. deployment style
+1. finish conservative cleanup of legacy scripts and duplicated tooling
+2. document settings, env, and secret boundaries
+3. document DB backup, restore, and production-to-dev/pre sync-down
+4. prepare `pre.efan.tw` deployment blueprint for Mac mini
+5. standardize release verification for `dev -> pre -> www`
 
-## Default Recommendation
+## Reference Docs
 
-If no old-code constraint forces a different choice:
+- `docs/LONG_TERM_MASTERPLAN.md`
+- `docs/EXECUTION_BACKLOG.md`
+- `docs/SETTINGS_ENV_SECRETS_POLICY.md`
+- `docs/WORKING_COPY_CLEANUP.md`
+- `docs/AI_TELEGRAM_DEPENDENCIES.md`
 
-- framework: `Next.js`
-- language: `TypeScript`
-- package manager: `pnpm`
-- database: `PostgreSQL`
-- runtime: `Docker Compose`
+## Rule Of Thumb
 
-## Why This Default
-
-- easy local development inside WSL2
-- clean path to containerized deployment on Mac mini
-- mature ecosystem
-- good fit for both content site and internal business features
-
-## After The Stack Is Confirmed
-
-We build these in order:
-
-1. app skeleton
-2. local Docker setup
-3. environment variable template
-4. Git baseline files
-5. import-review area for old backups
-
-## Current Recommended Next Step
-
-Now that the old system has been isolated and reviewed, the recommended next step is:
-
-1. document legacy assets that are worth keeping
-2. start rebuilding the `products` slice in the new app
-3. import product images and product content deliberately
-4. leave old business flows in `code-old` as reference only
+- preserve existing business functionality
+- improve structure gradually
+- prefer documented, repeatable operations over memory-driven operations
