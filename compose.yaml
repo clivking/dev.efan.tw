@@ -1,0 +1,47 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/app/Dockerfile.dev
+    container_name: efan-dev-web
+    working_dir: /workspace/app
+    command: sh -c "pnpm install && pnpm dev --hostname 0.0.0.0 --port 3000"
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.example
+    volumes:
+      - .:/workspace
+      - efan_app_node_modules:/workspace/app/node_modules
+      - efan_pnpm_store:/pnpm/store
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17-alpine
+    container_name: efan-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: efan_dev
+      POSTGRES_USER: efan
+      POSTGRES_PASSWORD: change-me
+    ports:
+      - "5432:5432"
+    volumes:
+      - efan_dev_postgres:/var/lib/postgresql/data
+
+  cloudflared:
+    image: cloudflare/cloudflared:2025.8.1
+    container_name: efan-dev-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    depends_on:
+      - web
+    volumes:
+      - ./infra/cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - /home/cliv/.cloudflared/3884ac9d-e3b5-4750-9881-6ad30a6ed60b.json:/etc/cloudflared/tunnel.json:ro
+
+volumes:
+  efan_app_node_modules:
+  efan_pnpm_store:
+  efan_dev_postgres:

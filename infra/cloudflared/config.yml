@@ -1,0 +1,7 @@
+tunnel: 3884ac9d-e3b5-4750-9881-6ad30a6ed60b
+credentials-file: /etc/cloudflared/tunnel.json
+
+ingress:
+  - hostname: dev.efan.tw
+    service: http://web:3000
+  - service: http_status:404

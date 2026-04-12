@@ -1,0 +1,16 @@
+# Workspace
+.DS_Store
+Thumbs.db
+.pnpm-store/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local review material
+import-review/tmp/
+
+# Editor
+.vscode/
+.idea/
