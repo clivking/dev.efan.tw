@@ -27,6 +27,7 @@ Current note:
 - legacy `ops/caddy/dev` files were removed
 - old compose leftovers `compose.old-app.yaml`, `compose.old-db.yaml`, and `compose.work-app.yaml` were removed
 - temporary app-local docs and `scripts/archive/` were removed
+- legacy one-off acceptance scripts with hard-coded ports, credentials, tokens, or artifact paths were removed from `app-legacy-base/scripts`
 - `.next` is still present because part of the cache is owned by the running container user
 - treat `.next` as disposable runtime cache and do not track it
 

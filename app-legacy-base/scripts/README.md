@@ -30,3 +30,4 @@ This folder contains the active maintenance scripts for the project.
 - Active Prisma scripts should use the local Prisma 7 helpers in this folder instead of importing `@prisma/client` directly.
 - `check-phones.mjs` is the canonical phone audit script.
 - Root-level scripts should be reserved for active, named maintenance utilities rather than ad hoc local experiments.
+- Historical phase-acceptance scripts that hard-coded old ports, credentials, tokens, or local artifact paths were removed during cleanup.
