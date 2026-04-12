@@ -54,6 +54,11 @@ test_*
 fix_*
 dec_*
 check-*
+!scripts/check-db.ts
+!scripts/check-encoding.mjs
+!scripts/check-phones.mjs
+!scripts/check-settings-db.mjs
+!scripts/check-uploads-integrity.mjs
 setup_wh*
 gen_sql*
 verify_*
