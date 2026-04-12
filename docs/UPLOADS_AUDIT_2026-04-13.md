@@ -63,16 +63,51 @@ Breakdown:
 - `product_content_image`: `20`
 - `product`: `4`
 
-## Post-Repair Summary
+## Post-Repair Summary (After Extension Drift Pass)
 
 After the repair pass:
 
 - unsupported DB paths: `0`
 - missing file paths on disk: `49`
 
+## Document Mapping Repair
+
+A second high-confidence repair pass was run for:
+
+- decoded path cases where the real file existed on disk
+- SOYAL manual-document rows that clearly map to existing `_DM.pdf` files
+
+Tool:
+
+- `app-legacy-base/scripts/fix-uploads-document-mappings.mjs`
+
+Result:
+
+- `11` rows repaired
+
+Breakdown:
+
+- `soyal-manual-to-dm`: `10`
+- `decoded-path-exists`: `1`
+
+## Current Remaining Gap
+
+After both repair passes:
+
+- unsupported DB paths: `0`
+- missing file paths on disk: `38`
+
+These remaining rows appear to be the true unresolved set.
+
+### Current shape of the remainder
+
+- `2` legacy product image references
+- `9` remaining SOYAL product-document references with no matching `_DM.pdf`
+- `27` ACTi product-document references with no matching local PDF file found
+
 ## What The Remaining 49 Most Likely Mean
 
-The remaining rows no longer look like simple extension drift.
+The remaining rows after the first pass no longer looked like simple extension drift.
 
 Observed patterns:
 
@@ -96,11 +131,9 @@ It should not be auto-fixed with the same extension-drift rule.
 
 ## Recommended Next Action
 
-1. classify the remaining `49` rows into:
-   - wrong document mapping
-   - truly missing file
-2. repair document-path mismatches in a separate pass
-3. only search backups for the true remainder
+1. treat the current `38` rows as the real missing-or-unmapped set
+2. search backups specifically for ACTi and remaining SOYAL product documents
+3. handle the last `2` product image references separately from document recovery
 
 ## Operational Note
 

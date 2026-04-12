@@ -53,6 +53,7 @@ tmp/garbled-db-reports/
 test_*
 fix_*
 !scripts/fix-uploads-extension-drift.mjs
+!scripts/fix-uploads-document-mappings.mjs
 dec_*
 check-*
 !scripts/check-db.ts
