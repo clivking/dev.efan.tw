@@ -51,6 +51,7 @@ export default function Home() {
               第一階段
             </p>
             <ul className="mt-6 space-y-4 text-sm leading-7 text-slate-300">
+              <li>本機主開發 port 固定使用 5000，避免與其他專案撞埠</li>
               <li>建立乾淨的本機開發骨架</li>
               <li>補齊 Docker 與環境變數範本</li>
               <li>建立匯入審核區隔離舊備份</li>

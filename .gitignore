@@ -10,6 +10,15 @@ Thumbs.db
 
 # Local review material
 import-review/tmp/
+import-review/code-old/**
+!import-review/code-old/
+!import-review/code-old/README.md
+import-review/db-old/*.sql
+
+# Legacy app local assets
+app-legacy-base/public/uploads/**
+!app-legacy-base/public/uploads/
+!app-legacy-base/public/uploads/.gitkeep
 
 # Editor
 .vscode/

@@ -178,6 +178,23 @@ Notes:
 - old backup material should go into `import-review/`
 - do not mix imported legacy files directly into `app/`
 
+## Legacy Naming Rule
+
+Anything restored, mounted, or reviewed from the old system must be marked with the suffix `-old`.
+
+Examples:
+
+- folders: `code-old`, `db-old`, `assets-old`
+- containers: `efan-old-db`, `efan-old-app`
+- databases: `efan_dev_old`
+- imported files: `schema-old.sql`, `customers-old.csv`
+
+Rule:
+
+- the new system keeps clean names
+- the old system always carries `-old`
+- legacy material is only renamed after review and approval
+
 ## What To Rebuild First
 
 Phase 1:

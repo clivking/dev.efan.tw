@@ -19,6 +19,13 @@ Clean rebuild workspace for the efan development environment.
 - `import-review/` isolated area for backup review
 - `scripts/` repeatable helper scripts
 
+## Legacy Rule
+
+- anything from the old system must carry the suffix `-old`
+- old data goes into `import-review/db-old/`
+- old code goes into `import-review/code-old/`
+- old temporary database work uses [compose.old-db.yaml](/home/cliv/projects/dev.efan.tw/compose.old-db.yaml)
+
 ## Local Commands
 
 Inside `app/`:
@@ -38,7 +45,7 @@ docker compose up --build
 
 This starts:
 
-- `web` on local port `3000`
+- `web` on local port `5000`
 - `db` on local port `5432`
 - `cloudflared` for `https://dev.efan.tw`
 

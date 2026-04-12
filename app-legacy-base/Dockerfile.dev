@@ -1,0 +1,42 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache libc6-compat
+
+# Install Chromium and Fonts for Puppeteer (Development needs this too)
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    font-noto-cjk \
+    font-noto-emoji \
+    wqy-zenhei
+
+RUN fc-cache -f
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Copy package files separately for better caching
+COPY package*.json ./
+COPY prisma ./prisma/
+
+RUN npm install
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# We don't COPY . here because we will use Volumes in docker-compose
+# EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV development
+
+# Start with dev mode (Hot Reload)
+CMD ["npm", "run", "dev"]

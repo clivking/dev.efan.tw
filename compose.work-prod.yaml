@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: efan-work-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: efan_working_copy
+      POSTGRES_USER: efan_work
+      POSTGRES_PASSWORD: change-me-work
+    ports:
+      - "5433:5432"
+    volumes:
+      - efan_work_postgres:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ./app-legacy-base
+      dockerfile: Dockerfile
+    container_name: efan-dev-web
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "5000:3000"
+    env_file:
+      - ./app-legacy-base/.env.compose-prod
+    volumes:
+      - ./app-legacy-base/public/uploads:/app/public/uploads
+
+  cloudflared:
+    image: cloudflare/cloudflared:2025.8.1
+    container_name: efan-dev-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    depends_on:
+      - web
+    volumes:
+      - ./infra/cloudflared/work-config.yml:/etc/cloudflared/config.yml:ro
+      - C:\Users\clivt\.cloudflared\3884ac9d-e3b5-4750-9881-6ad30a6ed60b.json:/etc/cloudflared/tunnel.json:ro
+
+volumes:
+  efan_work_postgres:

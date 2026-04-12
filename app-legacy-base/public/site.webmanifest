@@ -1,0 +1,21 @@
+{
+  "name": "一帆安全整合",
+  "short_name": "一帆安全",
+  "description": "40年門禁、監視、總機、弱電整合專家",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1B3A5C",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

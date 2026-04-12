@@ -37,3 +37,12 @@ We build these in order:
 3. environment variable template
 4. Git baseline files
 5. import-review area for old backups
+
+## Current Recommended Next Step
+
+Now that the old system has been isolated and reviewed, the recommended next step is:
+
+1. document legacy assets that are worth keeping
+2. start rebuilding the `products` slice in the new app
+3. import product images and product content deliberately
+4. leave old business flows in `code-old` as reference only

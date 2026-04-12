@@ -1,0 +1,61 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+/.build-home/
+
+# production
+/build
+
+# env
+.env
+.env.compose
+.env.local
+.env.production
+
+# debug
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uploads (dev)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# prisma
+/prisma/migrations/dev/
+
+# temp / debug / sensitive files
+*.log
+*.txt
+!README.md
+*.sql
+out*.json
+cust*.json
+login_res.json
+bt.csv
+utputFormat
+tmp_*
+tmp-*
+tmp-mobile-audit/
+tmp/
+tmp/garbled-db-reports/
+test_*
+fix_*
+dec_*
+check-*
+setup_wh*
+gen_sql*
+verify_*
+seed_phase*
+*.tar.gz
