@@ -25,6 +25,8 @@ Current note:
 - `.env` was removed
 - legacy `.github` workflow was removed
 - legacy `ops/caddy/dev` files were removed
+- old compose leftovers `compose.old-app.yaml`, `compose.old-db.yaml`, and `compose.work-app.yaml` were removed
+- temporary app-local docs and `scripts/archive/` were removed
 - `.next` is still present because part of the cache is owned by the running container user
 - treat `.next` as disposable runtime cache and do not track it
 
@@ -37,7 +39,8 @@ Current note:
 - `package.json`
 - `package-lock.json`
 - `Dockerfile.dev`
-- `.env.compose-work`
+- `Dockerfile`
+- `.env.compose-prod`
 
 Reason:
 
@@ -46,15 +49,13 @@ Reason:
 
 ## Review Later
 
-- `docker-compose.yml`
-- `Dockerfile`
-- `Dockerfile.macmini`
+- deep script consolidation
+- old content-planning docs that may have been fully superseded
 
 Reason:
 
-- probably legacy maintenance overhead
-- not required for immediate local work
-- remove only after we confirm nothing still depends on them
+- these still need feature-level judgement
+- remove only after we confirm they are not part of ongoing content work
 
 ## Next Audit Reference
 

@@ -1,7 +1,6 @@
 # Scripts Guide
 
-This folder contains the active maintenance scripts for the project. Historical,
-duplicate, or temporary utilities should live under `scripts/archive/`.
+This folder contains the active maintenance scripts for the project.
 
 ## Canonical Entry Points
 
@@ -29,6 +28,5 @@ duplicate, or temporary utilities should live under `scripts/archive/`.
 ## Notes
 
 - Active Prisma scripts should use the local Prisma 7 helpers in this folder instead of importing `@prisma/client` directly.
-- `check-phones.js` was a duplicate CommonJS copy and has been archived; use `check-phones.mjs` going forward.
-- Historical one-off or temporary scripts are moved into `scripts/archive/` and `scripts/archive/legacy/`.
+- `check-phones.mjs` is the canonical phone audit script.
 - Root-level scripts should be reserved for active, named maintenance utilities rather than ad hoc local experiments.
