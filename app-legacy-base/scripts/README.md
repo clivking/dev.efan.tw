@@ -40,3 +40,4 @@ This folder contains the active maintenance scripts for the project.
 - `fix-uploads-document-mappings.mjs` should be run as a dry-run first, then with `--apply` only for exact decoded-path or SOYAL `_DM.pdf` mappings.
 - Root-level scripts should be reserved for active, named maintenance utilities rather than ad hoc local experiments.
 - Historical phase-acceptance scripts that hard-coded old ports, credentials, tokens, or local artifact paths were removed during cleanup.
+- Vendor-specific one-off seed, fix, and debug scripts have been moved to `scripts/archive/legacy/` so the root stays focused on current maintenance tools.

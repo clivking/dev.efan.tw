@@ -58,3 +58,24 @@ The remaining scripts should be reviewed into explicit buckets:
 - audit `seed-*` scripts for duplication by product/vendor family
 - audit `fix-*` scripts for one-time DB repairs that should no longer stay active
 - audit `debug-*` scripts for removal or isolation
+
+## April 13, 2026 Cleanup Result
+
+The root `app-legacy-base/scripts/` folder no longer keeps obvious one-off
+vendor recovery scripts mixed into the active maintenance surface.
+
+Moved into `app-legacy-base/scripts/archive/legacy/`:
+
+- vendor seed scripts such as `seed-acti-*`, `seed-soyal-*`, `seed-akuvox*`,
+  `seed-cctek-b600d.js`, and `seed-tecom.js`
+- one-time repair helpers such as `fix-acti-names.js`,
+  `fix-soyal-names.js`, `fix-image-urls.js`, `fix-phone-data.js`,
+  and `fix-prisma.js`
+- one-off debugging helper `debug-quote-items.mjs`
+
+This leaves the root focused on:
+
+- canonical checks
+- currently supported recovery and repair tools
+- build and verification utilities
+- a smaller set of still-reviewable data migration helpers
