@@ -105,6 +105,29 @@ These remaining rows appear to be the true unresolved set.
 - `9` remaining SOYAL product-document references with no matching `_DM.pdf`
 - `27` ACTi product-document references with no matching local PDF file found
 
+## Recovery From Www
+
+A direct recovery pass from `https://www.efan.tw` was then executed against the still-missing local paths.
+
+Result:
+
+- `36` files were downloaded successfully from `www`
+- `2` files still returned `404` from `www`
+
+The two unresolved files are:
+
+- `/api/uploads/products/a01f520c-d4d9-4880-bdb5-28c1a807db80.png` (`AR-837-E_2-1.png`)
+- `/api/uploads/products/b5ce0735-977c-4a1a-9e52-bfa706f312e0.png` (`AR-721H_1-1.png`)
+
+## Final Status For This Pass
+
+After local repairs plus direct recovery from `www`:
+
+- unsupported DB paths: `0`
+- missing file paths on disk: `2`
+
+Those final `2` rows are currently the true unresolved remainder.
+
 ## What The Remaining 49 Most Likely Mean
 
 The remaining rows after the first pass no longer looked like simple extension drift.
@@ -131,9 +154,9 @@ It should not be auto-fixed with the same extension-drift rule.
 
 ## Recommended Next Action
 
-1. treat the current `38` rows as the real missing-or-unmapped set
-2. search backups specifically for ACTi and remaining SOYAL product documents
-3. handle the last `2` product image references separately from document recovery
+1. treat the current `2` rows as the true unresolved missing-image set
+2. search any older image backups specifically for `AR-837-E_2-1.png` and `AR-721H_1-1.png`
+3. if no original files are found, decide whether to remap those DB rows to existing representative product images
 
 ## Operational Note
 
