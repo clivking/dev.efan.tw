@@ -13,11 +13,12 @@ Recovered and stabilized workspace for the efan development environment.
 
 ## Structure
 
-- `app/` early clean-baseline rebuild app kept as reference
+- `app/` early clean-baseline rebuild app kept as reference, not the live runtime
 - `app-legacy-base/` recovered working copy that currently powers `dev.efan.tw`
 - `infra/` local and deployment infrastructure files
 - `docs/` operating notes, cleanup notes, and long-term planning
 - `import-review/` isolated area for backup review
+- `scripts/` root-level old-db review helpers and workspace support notes
 
 ## Legacy Rule
 
@@ -64,3 +65,7 @@ docker compose -f compose.work-prod.yaml up --build -d
 - `docs/SETTINGS_ENV_SECRETS_POLICY.md`
 - `docs/WORKING_COPY_CLEANUP.md`
 - `docs/README.md`
+
+Archived bootstrap notes:
+
+- `docs/archive/bootstrap-notes/`

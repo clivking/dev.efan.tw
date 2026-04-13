@@ -34,6 +34,7 @@
 
 - `docs/archive/operational-review/`
 - `docs/archive/audits/UPLOADS_AUDIT_2026-04-13.md`
+- `docs/archive/bootstrap-notes/`
 
 ## Rule Of Thumb
 

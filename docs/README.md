@@ -24,6 +24,9 @@ These are the documents that should guide ongoing operations:
 
 ## Archive Areas
 
+- `archive/bootstrap-notes/`
+  - early rebuild planning notes
+  - initial environment architecture notes captured before the working copy stabilized
 - `archive/operational-review/`
   - working-copy inventories
   - navigation/homepage/admin triage notes
