@@ -63,3 +63,4 @@ docker compose -f compose.work-prod.yaml up --build -d
 - `docs/EXECUTION_BACKLOG.md`
 - `docs/SETTINGS_ENV_SECRETS_POLICY.md`
 - `docs/WORKING_COPY_CLEANUP.md`
+- `docs/README.md`

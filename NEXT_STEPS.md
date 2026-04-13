@@ -25,10 +25,15 @@
 - `docs/DB_BACKUP_RESTORE_SYNC.md`
 - `docs/WORKING_COPY_STATUS.md`
 - `docs/UPLOADS_GOVERNANCE.md`
-- `docs/UPLOADS_AUDIT_2026-04-13.md`
 - `docs/SCRIPTS_GOVERNANCE.md`
 - `docs/WORKING_COPY_CLEANUP.md`
 - `docs/AI_TELEGRAM_DEPENDENCIES.md`
+- `docs/README.md`
+
+## Archived Reference
+
+- `docs/archive/operational-review/`
+- `docs/archive/audits/UPLOADS_AUDIT_2026-04-13.md`
 
 ## Rule Of Thumb
 
