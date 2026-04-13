@@ -43,3 +43,4 @@ This folder contains the active maintenance scripts for the project.
 - Vendor-specific one-off seed, fix, and debug scripts have been moved to `scripts/archive/legacy/` so the root stays focused on current maintenance tools.
 - Destructive cleanup/import helpers, one-time backfills, and workstation-bound conversion scripts were also moved to `scripts/archive/legacy/`.
 - Historical migrations, bootstrap helpers, and environment-specific debug/refresh scripts were moved to `scripts/archive/legacy/`.
+- Manual SQL probes and one-off SQL patch files were moved to `scripts/archive/legacy/` as well.

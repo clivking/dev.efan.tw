@@ -31,6 +31,7 @@ Current note:
 - one-off vendor seed, repair, and debug scripts were moved into `app-legacy-base/scripts/archive/legacy/`
 - destructive cleanup/import helpers, one-time backfills/updates, and workstation-bound conversion scripts were also moved into `app-legacy-base/scripts/archive/legacy/`
 - historical migration/bootstrap helpers and old environment-specific debug/refresh scripts were also moved into `app-legacy-base/scripts/archive/legacy/`
+- manual SQL probes and one-off SQL patch files were also moved into `app-legacy-base/scripts/archive/legacy/`
 - `.next` is still present because part of the cache is owned by the running container user
 - treat `.next` as disposable runtime cache and do not track it
 

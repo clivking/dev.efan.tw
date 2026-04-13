@@ -23,6 +23,8 @@ Current archive contents include:
   `seed-categories.ts`, and `add-title-suffix-setting.ts`
 - old environment-specific operator helpers such as `dev-refresh.sh`,
   `db-check.mjs`, `debug_stats.ts`, and `verify-ids.mjs`
+- manual SQL probes and one-off SQL patches such as `check-*.sql`,
+  `fix_images.sql`, `update_dates.sql`, and `restructure-categories.sql`
 
 If one of these ever needs to be reused, it should be reviewed, renamed,
 documented, and promoted back into the active root with a stable purpose.

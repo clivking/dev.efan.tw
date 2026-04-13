@@ -83,6 +83,8 @@ Moved into `app-legacy-base/scripts/archive/legacy/`:
   `seed-categories.ts`, and `add-title-suffix-setting.ts`
 - environment-specific debug/operator helpers such as `dev-refresh.sh`,
   `db-check.mjs`, `debug_stats.ts`, and `verify-ids.mjs`
+- manual SQL probes and one-off SQL patches such as `check-*.sql`,
+  `fix_images.sql`, `update_dates.sql`, and `restructure-categories.sql`
 
 This leaves the root focused on:
 
