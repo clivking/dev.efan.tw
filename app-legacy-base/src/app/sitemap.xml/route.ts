@@ -64,7 +64,7 @@ export async function GET() {
             const productIds = products.map(p => p.id);
             const uploadedImages = await prisma.uploadedFile.findMany({
                 where: {
-                    entityType: 'product',
+                    entityType: 'product_website',
                     entityId: { in: productIds },
                     mimetype: { startsWith: 'image/' },
                 },

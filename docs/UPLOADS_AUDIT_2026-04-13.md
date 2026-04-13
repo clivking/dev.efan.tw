@@ -128,6 +128,31 @@ After local repairs plus direct recovery from `www`:
 
 Those final `2` rows are currently the true unresolved remainder.
 
+## Orphan Record Cleanup
+
+The final `2` missing image rows were confirmed to belong to a legacy orphan bucket:
+
+- `entity_type = 'product'`
+- `entity_id IS NULL`
+
+Those rows were not part of the current product image pipeline, which uses:
+
+- `product_website`
+- `product_document`
+- `product_content_image`
+
+The orphan bucket contained `7` rows total and was removed from `uploaded_files`.
+
+## Final Status After Cleanup
+
+After orphan cleanup:
+
+- `uploaded_files` rows: `326`
+- unsupported DB paths: `0`
+- missing file paths on disk: `0`
+
+The uploads integrity audit is now clean.
+
 ## What The Remaining 49 Most Likely Mean
 
 The remaining rows after the first pass no longer looked like simple extension drift.
@@ -154,9 +179,9 @@ It should not be auto-fixed with the same extension-drift rule.
 
 ## Recommended Next Action
 
-1. treat the current `2` rows as the true unresolved missing-image set
-2. search any older image backups specifically for `AR-837-E_2-1.png` and `AR-721H_1-1.png`
-3. if no original files are found, decide whether to remap those DB rows to existing representative product images
+1. keep using `check-uploads-integrity.mjs` as the canonical audit
+2. treat future missing-file reports as new regressions, not historical baseline debt
+3. continue with uploads backup and restore standardization
 
 ## Operational Note
 
