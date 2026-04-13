@@ -29,6 +29,7 @@ Current note:
 - temporary app-local docs and `scripts/archive/` were removed
 - legacy one-off acceptance scripts with hard-coded ports, credentials, tokens, or artifact paths were removed from `app-legacy-base/scripts`
 - one-off vendor seed, repair, and debug scripts were moved into `app-legacy-base/scripts/archive/legacy/`
+- destructive cleanup/import helpers, one-time backfills/updates, and workstation-bound conversion scripts were also moved into `app-legacy-base/scripts/archive/legacy/`
 - `.next` is still present because part of the cache is owned by the running container user
 - treat `.next` as disposable runtime cache and do not track it
 

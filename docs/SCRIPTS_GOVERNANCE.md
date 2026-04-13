@@ -72,6 +72,13 @@ Moved into `app-legacy-base/scripts/archive/legacy/`:
   `fix-soyal-names.js`, `fix-image-urls.js`, `fix-phone-data.js`,
   and `fix-prisma.js`
 - one-off debugging helper `debug-quote-items.mjs`
+- destructive cleanup/import helpers such as `cleanup-*`,
+  `clear-customers.*`, `import-customers.js`, and `import_data.sql`
+- one-time backfill/update helpers such as `backfill-*`, `update-*`,
+  `prep-test-data.js`, and `restore-guides-copy.mjs`
+- workstation-bound asset conversion helpers such as
+  `convert-access-photos.mjs`, `convert-photos.mjs`, and
+  `convert-uploads-to-webp.mjs`
 
 This leaves the root focused on:
 
