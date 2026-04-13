@@ -79,10 +79,14 @@ Moved into `app-legacy-base/scripts/archive/legacy/`:
 - workstation-bound asset conversion helpers such as
   `convert-access-photos.mjs`, `convert-photos.mjs`, and
   `convert-uploads-to-webp.mjs`
+- historical migration/bootstrap helpers such as `migrate-*`,
+  `seed-categories.ts`, and `add-title-suffix-setting.ts`
+- environment-specific debug/operator helpers such as `dev-refresh.sh`,
+  `db-check.mjs`, `debug_stats.ts`, and `verify-ids.mjs`
 
 This leaves the root focused on:
 
 - canonical checks
 - currently supported recovery and repair tools
 - build and verification utilities
-- a smaller set of still-reviewable data migration helpers
+- a very small set of active data-shape maintenance helpers
