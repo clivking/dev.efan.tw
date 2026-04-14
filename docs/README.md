@@ -15,6 +15,8 @@ These are the documents that should guide ongoing operations:
 - `SECRETS_INVENTORY.md`
 - `SETTINGS_ENV_SECRETS_POLICY.md`
 - `DB_BACKUP_RESTORE_SYNC.md`
+- `EFAN_UPLOAD_FLOW.md`
+- `CUSTOMER_QUOTE_SYNC_SCOPE.md`
 - `UPLOADS_GOVERNANCE.md`
 - `WORKING_COPY_STATUS.md`
 - `WORKING_COPY_CLEANUP.md`
