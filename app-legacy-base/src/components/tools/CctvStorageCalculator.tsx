@@ -7,6 +7,7 @@ import CctvCapacityForm, { type CalculatorFormState } from '@/components/tools/C
 import CctvCapacityResults from '@/components/tools/CctvCapacityResults';
 import { calculateRequiredStorage, calculateRetentionDays } from '@/lib/cctv-capacity';
 import { DEFAULT_SAFETY_MARGIN } from '@/lib/cctv-capacity-presets';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 import {
     CCTV_CALCULATOR_FAQ_ITEMS,
     CCTV_CAMERA_GUIDE_ROWS,
@@ -122,7 +123,7 @@ function ProductSection({
                 {products.map((product) => (
                     <article key={product.title} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[#fcfbf8] shadow-sm">
                         <div className="relative aspect-[16/10] bg-white">
-                            <Image src={product.image} alt={product.alt} fill sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" className="object-contain p-6" />
+                            <Image src={product.image} alt={product.alt} fill sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" unoptimized={shouldBypassImageOptimization(product.image)} className="object-contain p-6" />
                         </div>
                         <div className="p-5">
                             <h4 className="text-lg font-black text-slate-950">{product.title}</h4>

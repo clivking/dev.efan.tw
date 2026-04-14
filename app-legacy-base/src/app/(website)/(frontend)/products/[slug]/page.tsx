@@ -13,6 +13,7 @@ import { PRODUCT_PAGE_COPY } from '@/lib/product-page-copy';
 import { prisma } from '@/lib/prisma';
 import { getProductMainImage, getProductMainImages, stripHtml } from '@/lib/product-helpers';
 import { getRequestSiteContext, toAbsoluteUrl } from '@/lib/site-url';
+import { normalizeImageSrc, shouldBypassImageOptimization } from '@/lib/image-paths';
 import { buildBreadcrumbSchema, buildFaqSchema, buildProductSchema } from '@/lib/structured-data';
 import { renderContent } from '@/lib/tiptap';
 import ProductDetailClient from './ProductDetailClient';
@@ -446,8 +447,8 @@ export default async function ProductDetailPage({ params }: Props) {
 
     const categorySlug = product.category?.seoSlug || product.category?.id || '';
     const mainImage = websiteImages.length > 0 ? websiteImages[0].filepath : null;
-    const galleryImages = websiteImages.map((image) => image.filepath);
-    const absoluteImages = websiteImages.map((image) => toAbsoluteUrl(image.filepath, site.origin));
+    const galleryImages = websiteImages.map((image) => normalizeImageSrc(image.filepath));
+    const absoluteImages = websiteImages.map((image) => toAbsoluteUrl(normalizeImageSrc(image.filepath), site.origin));
     const absoluteMainImage = mainImage ? toAbsoluteUrl(mainImage, site.origin) : null;
     const imageStoryItems = websiteImages
         .map((image, index) => ({
@@ -923,11 +924,12 @@ export default async function ProductDetailPage({ params }: Props) {
                             >
                                 <div className="relative aspect-[16/9] bg-[linear-gradient(180deg,#ffffff,#f8fafc)] p-4 sm:p-5">
                                     <Image
-                                        src={image.filepath}
+                                        src={normalizeImageSrc(image.filepath)}
                                         alt={`${product.name} ${PRODUCT_PAGE_COPY.imageGallerySuffix} ${index + 1}`}
                                         fill
                                         sizes="(min-width: 1280px) 1280px, 100vw"
                                         quality={90}
+                                        unoptimized={shouldBypassImageOptimization(image.filepath)}
                                         className={`${image.displayMode === 'cover' ? 'object-cover' : 'object-contain p-2 sm:p-3'}`}
                                     />
                                 </div>
@@ -1000,10 +1002,11 @@ export default async function ProductDetailPage({ params }: Props) {
                                                     <div className="relative h-24 w-24 flex-none overflow-hidden rounded-[20px] bg-[radial-gradient(circle_at_top,#f8fbff,white_60%,#eef2f7)]">
                                                         {item.imageUrl ? (
                                                             <Image
-                                                                src={item.imageUrl}
+                                                                src={normalizeImageSrc(item.imageUrl)}
                                                                 alt={item.name}
                                                                 fill
                                                                 sizes="96px"
+                                                                unoptimized={shouldBypassImageOptimization(item.imageUrl)}
                                                                 className="object-contain p-3"
                                                             />
                                                         ) : (

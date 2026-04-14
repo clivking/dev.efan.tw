@@ -21,6 +21,7 @@ import {
 import { SERVICES } from '@/lib/constants';
 import type { CategoryTree } from '@/lib/category-tree';
 import type { CompanyInfo } from '@/lib/company';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 const HeaderMobileContent = dynamic(() => import('./HeaderMobileContent'), { ssr: false });
 
@@ -120,7 +121,7 @@ export default function Header({ company: companyProp, categories = [] }: Header
             <Link href="/" className="flex items-center gap-2">
               {company.logoUrl && company.logoUrl !== '/images/logo.png' ? (
                 <div className="relative h-12 md:h-14" style={{ minWidth: '160px' }}>
-                  <Image src={company.logoUrl} alt={company.name} height={56} width={280} className="h-full w-auto object-contain" priority style={{ height: '100%', width: 'auto' }} />
+                  <Image src={company.logoUrl} alt={company.name} height={56} width={280} className="h-full w-auto object-contain" priority unoptimized={shouldBypassImageOptimization(company.logoUrl)} style={{ height: '100%', width: 'auto' }} />
                 </div>
               ) : (
                 <>

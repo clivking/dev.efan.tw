@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 interface ProductTableProps {
     products: any[];
@@ -125,7 +126,7 @@ export default function ProductTable({ products, onDelete, onReorder, selectedId
                                     <div className="flex items-center gap-4">
                                         <div className="relative h-16 w-16 bg-gray-100 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform overflow-hidden shadow-inner">
                                             {product.imageUrl ? (
-                                                <Image src={product.imageUrl} alt={product.name} fill sizes="64px" className="h-full w-full object-cover" />
+                                                <Image src={product.imageUrl} alt={product.name} fill sizes="64px" unoptimized={shouldBypassImageOptimization(product.imageUrl)} className="h-full w-full object-cover" />
                                             ) : (
                                                 product.type === 'bundle' ? '📦' : '🔌'
                                             )}

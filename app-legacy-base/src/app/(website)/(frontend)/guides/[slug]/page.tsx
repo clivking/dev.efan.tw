@@ -9,6 +9,7 @@ import { getServiceEntitiesBySlugs, getServiceLabel } from '@/lib/content-entiti
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPublishedGuideBySlug } from '@/lib/guide-content';
 import { GUIDE_CONTENT_TYPE_LABELS, GUIDE_SEARCH_INTENT_LABELS } from '@/lib/guide-schema';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 import { prisma } from '@/lib/prisma';
 import { getProductMainImages } from '@/lib/product-helpers';
 import { getRequestSiteContext } from '@/lib/site-url';
@@ -468,7 +469,7 @@ export default async function GuideDetailPage({ params }: Props) {
                           src={product.imageUrl}
                           alt={product.name}
                           fill
-                          unoptimized={product.imageUrl.startsWith('/api/uploads/products/')}
+                          unoptimized={shouldBypassImageOptimization(product.imageUrl)}
                           className="object-contain p-4"
                           sizes="(min-width: 768px) 33vw, 100vw"
                         />

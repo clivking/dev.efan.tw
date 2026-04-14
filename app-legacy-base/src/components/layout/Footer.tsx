@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, Mail, MapPin, Phone } from 'lucide-react';
 import { SERVICES } from '@/lib/constants';
 import type { CompanyInfo } from '@/lib/company';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 const GUIDE_FOOTER_LINKS = [
   { href: '/guides/2026-access-control-tco-analysis', label: '2026 門禁 TCO 採購分析' },
@@ -47,7 +48,7 @@ export default function Footer({ company: companyProp }: { company?: CompanyInfo
                     width={120}
                     height={32}
                     className="h-8 w-auto object-contain drop-shadow-lg"
-                    unoptimized
+                    unoptimized={shouldBypassImageOptimization(company.pdfLogoUrl)}
                   />
                   <span className="text-xl font-bold tracking-wide text-white">{company.name}</span>
                 </div>

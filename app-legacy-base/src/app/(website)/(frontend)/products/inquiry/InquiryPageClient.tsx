@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useInquiry } from '@/components/products/InquiryContext';
 import { Turnstile } from '@marsidev/react-turnstile';
 import PageBanner from '@/components/common/PageBanner';
+import { normalizeImageSrc, shouldBypassImageOptimization } from '@/lib/image-paths';
 
 export default function InquiryPageClient() {
     const { items, removeItem, updateQuantity, clearAll, totalCount } = useInquiry();
@@ -125,9 +126,10 @@ export default function InquiryPageClient() {
                                                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl flex-shrink-0 relative overflow-hidden border border-gray-100">
                                                     {item.imageUrl ? (
                                                         <Image
-                                                            src={item.imageUrl}
+                                                            src={normalizeImageSrc(item.imageUrl)}
                                                             alt={item.name}
                                                             fill
+                                                            unoptimized={shouldBypassImageOptimization(item.imageUrl)}
                                                             className="object-contain p-1"
                                                             sizes="80px"
                                                         />

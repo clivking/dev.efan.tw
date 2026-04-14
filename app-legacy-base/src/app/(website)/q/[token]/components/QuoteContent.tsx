@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { formatPhoneNumber } from '@/lib/phone-format';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 const BRAND = {
     primary: "#1B3A5C",
@@ -26,7 +27,7 @@ export function QuoteHeader({ quote, company }: { quote: any, company: any }) {
                 <div className="flex flex-col items-center gap-1 group">
                     {company.logoUrl ? (
                         <div className="relative w-20 h-20 bg-white rounded-xl shadow-sm border border-gray-50 flex items-center justify-center p-2">
-                            <Image src={company.logoUrl} alt={company.name} width={64} height={64} className="object-contain" />
+                            <Image src={company.logoUrl} alt={company.name} width={64} height={64} unoptimized={shouldBypassImageOptimization(company.logoUrl)} className="object-contain" />
                         </div>
                     ) : (
                         <div className="w-16 h-16 bg-[#1B3A5C] rounded-xl flex items-center justify-center text-white font-black text-xl">EFAN</div>
@@ -260,7 +261,7 @@ export function SignedBanner({ signature }: { signature: any }) {
                     <p className="text-gray-500">{signature.signerTitle}</p>
                 </div>
                 <div className="h-16 w-48 border-l pl-6 flex items-center">
-                    <Image src={signature.signatureImage.startsWith('/uploads/') ? `/api${signature.signatureImage}` : signature.signatureImage} alt="簽名" width={150} height={50} className="object-contain" />
+                    <Image src={signature.signatureImage.startsWith('/uploads/') ? `/api${signature.signatureImage}` : signature.signatureImage} alt="簽名" width={150} height={50} unoptimized={shouldBypassImageOptimization(signature.signatureImage.startsWith('/uploads/') ? `/api${signature.signatureImage}` : signature.signatureImage)} className="object-contain" />
                 </div>
             </div>
         </div>
@@ -274,7 +275,7 @@ export function QuoteFooter({ company }: { company: any }) {
                 <span className="text-[13px] font-bold" style={{ color: BRAND.gray900 }}>公司用印</span>
                 <div className="w-44 h-44 border-2 border-dashed rounded-lg flex items-center justify-center relative overflow-hidden" style={{ borderColor: BRAND.gray200 }}>
                     {company.stampUrl ? (
-                        <Image src={company.stampUrl} alt="Company Stamp" width={160} height={160} className="object-contain" />
+                        <Image src={company.stampUrl} alt="Company Stamp" width={160} height={160} unoptimized={shouldBypassImageOptimization(company.stampUrl)} className="object-contain" />
                     ) : (
                         <span className="text-[10px] text-gray-300 font-bold uppercase italic">Official Stamp</span>
                     )}

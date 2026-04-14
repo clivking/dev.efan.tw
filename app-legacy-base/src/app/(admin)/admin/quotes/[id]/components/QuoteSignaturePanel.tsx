@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import React, { useState, useEffect, useCallback } from 'react';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 interface SignatureData {
     id: string;
@@ -76,7 +77,7 @@ export default function QuoteSignaturePanel({ quoteId, status }: QuoteSignatureP
                         alt="Customer Signature"
                         width={320}
                         height={96}
-                        unoptimized
+                        unoptimized={shouldBypassImageOptimization(signature.signatureImage)}
                         className="max-h-24 w-auto object-contain"
                     />
                 </div>

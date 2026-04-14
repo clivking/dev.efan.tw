@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertCircle, FileX, Clock, Clock4 } from 'lucide-react';
 import Image from 'next/image';
 import { formatPhoneNumber } from '@/lib/phone-format';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 interface Props {
     type: 'not_found' | 'deactivated' | 'expired' | 'not_ready';
@@ -50,6 +51,7 @@ export function QuoteStatusPage({ type, companyInfo }: Props) {
                             alt={companyInfo.name}
                             width={160}
                             height={60}
+                            unoptimized={shouldBypassImageOptimization(companyInfo.logoUrl)}
                             className="object-contain"
                         />
                     </div>
