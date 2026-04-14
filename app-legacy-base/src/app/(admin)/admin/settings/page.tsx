@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import SeoLogTab from './SeoLogTab';
 import UsersTab from './UsersTab';
 
@@ -161,7 +161,7 @@ export default function SettingsPage() {
     if (hash) setTab(hash);
   }, []);
 
-  useEffect(() => {
+  const handleTabSideEffects = useEffectEvent(() => {
     if (tab === 'ai') {
       const provider = getCurrentValue('ai_provider') || 'gemini';
       void fetchModels(provider as 'gemini' | 'openai');
@@ -172,6 +172,10 @@ export default function SettingsPage() {
     if (tab === 'audit') {
       void fetchAuditLogs();
     }
+  });
+
+  useEffect(() => {
+    handleTabSideEffects();
   }, [tab]);
 
   const current = NAV.find((item) => item.id === tab) || NAV[0];
