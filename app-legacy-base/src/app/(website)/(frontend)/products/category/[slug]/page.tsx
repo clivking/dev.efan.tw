@@ -9,6 +9,7 @@ import { getCompanyInfo } from '@/lib/company';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getProductMainImages } from '@/lib/product-helpers';
 import { getRequestSiteContext } from '@/lib/site-url';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { buildBreadcrumbSchema, buildFaqSchema } from '@/lib/structured-data';
 import ProductCatalog from '../../ProductCatalog';
 import PageBanner from '@/components/common/PageBanner';
@@ -223,7 +224,14 @@ export default async function CategoryPage({ params }: Props) {
 
     const faqs = getCategoryFAQs(displayName);
     const faqSchema = buildFaqSchema(faqs);
-    const breadcrumbLd = buildBreadcrumbSchema(breadcrumbItems);
+    const breadcrumbs = withHomeBreadcrumb(
+        { label: '產品目錄', href: '/products' },
+        ...(data.currentCategory.parent && parentSlug
+            ? [{ label: parentDisplayName || data.currentCategory.parent.name, href: `/products/category/${parentSlug}` }]
+            : []),
+        data.isTopLevel ? displayName : data.currentCategory.name,
+    );
+    const breadcrumbLd = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, baseUrl, `/products/category/${slug}`));
 
     const collectionSchema = {
         '@context': 'https://schema.org',
@@ -257,13 +265,7 @@ export default async function CategoryPage({ params }: Props) {
 
             <PageBanner
                 title={data.isTopLevel ? displayName : data.currentCategory.name}
-                breadcrumbs={[
-                    { label: '產品目錄', href: '/products' },
-                    ...(data.currentCategory.parent && parentSlug
-                        ? [{ label: parentDisplayName || data.currentCategory.parent.name, href: `/products/category/${parentSlug}` }]
-                        : []),
-                    { label: data.isTopLevel ? displayName : data.currentCategory.name },
-                ]}
+                breadcrumbs={breadcrumbs}
             />
 
             <ProductCatalog
@@ -271,6 +273,7 @@ export default async function CategoryPage({ params }: Props) {
                 categories={data.categories}
                 activeCategory={data.isTopLevel ? slug : parentSlug || ''}
                 activeSubCategory={data.isTopLevel ? undefined : slug}
+                searchBasePath={`/products/category/${data.currentCategory.seoSlug || slug}`}
             />
 
             <section className="bg-white py-16">

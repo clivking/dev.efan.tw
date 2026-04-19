@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { prisma } from '@/lib/prisma';
 import { getSetting } from '@/lib/settings';
+import { normalizeIpAddress, parseIpList } from '@/lib/ip';
+import { sendTelegramNotification, formatQuoteMessage } from '@/lib/notifications/telegram';
 
 export async function POST(
     request: NextRequest,
@@ -53,8 +55,8 @@ export async function POST(
         }
 
         // Get IP
-        const ipAddressRaw = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const clientIp = String(ipAddressRaw).split(',')[0].trim();
+        const ipAddressRaw = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+        const clientIp = normalizeIpAddress(ipAddressRaw);
 
         // 3. Check for exclusion (IP or Cookie)
         // a. Check Cookie
@@ -68,12 +70,12 @@ export async function POST(
             getSetting('exclude_view_tracking_ips', ''),
             getSetting('dynamic_admin_ips', '')
         ]);
-        
+
         const excludedIpList = [
-            ...manualExcludedIps.split(','),
-            ...dynamicExcludedIps.split(',')
-        ].map(ip => ip.trim()).filter(Boolean);
-        
+            ...parseIpList(manualExcludedIps),
+            ...parseIpList(dynamicExcludedIps),
+        ];
+
         if (excludedIpList.includes(clientIp)) {
             return NextResponse.json({ viewId: 'ip-ignored' });
         }
@@ -102,7 +104,6 @@ export async function POST(
         if (isFirstView) {
             const enableViewNotify = await getSetting('enable_quote_viewed_notification', true);
             if (enableViewNotify) {
-                const { formatQuoteMessage, fireAndForgetNotification } = await import('@/lib/notifications/telegram');
                 const q = quoteToken.quote;
                 const customerName = q.customer?.companyNames[0]?.companyName || q.customer?.contacts[0]?.name || '未知客戶';
                 const message = formatQuoteMessage('viewed', {
@@ -110,7 +111,7 @@ export async function POST(
                     quoteNumber: q.quoteNumber,
                     customerName: customerName
                 });
-                fireAndForgetNotification(message, { type: 'quote_viewed', entityType: 'quotes', entityId: q.id });
+                await sendTelegramNotification(message, { type: 'quote_viewed', entityType: 'quotes', entityId: q.id });
             }
         }
 

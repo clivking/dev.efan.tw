@@ -67,7 +67,7 @@ export default async function QuotePage({ params }: { params: Promise<{ token: s
             phone: '02-7730-1158',
             email: 'safekings@gmail.com',
             address: '台北市大安區四維路14巷15號7樓之1',
-            logoUrl: '/uploads/logo.png',
+            logoUrl: '/images/logo.png',
         };
         return <QuoteStatusPage type={data.error as any} companyInfo={data.company || dummyCompany} />;
     }

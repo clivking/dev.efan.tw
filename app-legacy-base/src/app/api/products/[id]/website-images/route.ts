@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '@/lib/prisma';
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware/auth';
-import { resolveUploadSubpath } from '@/lib/runtime-paths';
+import { buildCanonicalProductImagePath } from '@/lib/product-upload-paths';
 
 // GET — 取得產品的前台圖片列表
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -54,32 +53,33 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             return NextResponse.json({ error: 'File size too large (max 5MB)' }, { status: 400 });
         }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = `${uuidv4()}${path.extname(file.name)}`;
-        const uploadDir = resolveUploadSubpath('products');
-        const filepath = path.join(uploadDir, filename);
-
-        await mkdir(uploadDir, { recursive: true });
-        await writeFile(filepath, buffer);
-
-        const relativePath = `/api/uploads/products/${filename}`;
-
         // Get current max sort_order
         const maxSort = await prisma.uploadedFile.aggregate({
             where: { entityType: 'product_website', entityId: id },
             _max: { sortOrder: true },
         });
+        const sortOrder = (maxSort._max.sortOrder ?? -1) + 1;
+        const target = buildCanonicalProductImagePath({
+            product,
+            originalFilename: file.name,
+            mimetype: file.type,
+            order: sortOrder + 1,
+        });
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        await mkdir(path.dirname(target.absolutePath), { recursive: true });
+        await writeFile(target.absolutePath, buffer);
 
         const record = await prisma.uploadedFile.create({
             data: {
-                filename: file.name,
-                filepath: relativePath,
+                filename: target.filename,
+                filepath: target.apiPath,
                 mimetype: file.type,
                 size: file.size,
                 entityType: 'product_website',
                 entityId: id,
                 uploadedBy: req.user!.id,
-                sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
+                sortOrder,
             },
         });
 

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
+import { normalizeImageSrc, shouldBypassImageOptimization } from '@/lib/image-paths';
 
 interface ProductImageGalleryProps {
     images: string[];
@@ -20,7 +21,8 @@ export default function ProductImageGallery({ images, productName }: ProductImag
     const [activeIndex, setActiveIndex] = useState(0);
     const [lightboxOpen, setLightboxOpen] = useState(false);
 
-    const activeImage = images[activeIndex] || null;
+    const activeImage = normalizeImageSrc(images[activeIndex] || null);
+    const shouldBypassOptimization = shouldBypassImageOptimization(activeImage);
 
     const handlePrev = useCallback(() => {
         setActiveIndex((index) => (index > 0 ? index - 1 : images.length - 1));
@@ -51,6 +53,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
                                 alt={productName}
                                 fill
                                 sizes="(min-width: 1024px) 42vw, 100vw"
+                                unoptimized={shouldBypassOptimization}
                                 className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_28px_36px_rgba(15,23,42,0.26)] transition-transform duration-500 group-hover:scale-[1.03]"
                                 priority
                             />
@@ -146,7 +149,7 @@ export default function ProductImageGallery({ images, productName }: ProductImag
                     </button>
 
                     <div className="relative h-[94vh] w-[98vw]" onClick={(event) => event.stopPropagation()}>
-                        <Image src={activeImage} alt={productName} fill sizes="98vw" className="h-full w-full object-contain" priority />
+                        <Image src={activeImage} alt={productName} fill sizes="98vw" unoptimized={shouldBypassOptimization} className="h-full w-full object-contain" priority />
                     </div>
 
                     {images.length > 1 ? (

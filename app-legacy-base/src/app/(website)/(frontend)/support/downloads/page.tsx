@@ -2,7 +2,10 @@
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import JsonLdScript from '@/components/common/JsonLdScript';
 import PageBanner from '@/components/common/PageBanner';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 interface Download {
     id: string;
@@ -41,6 +44,15 @@ export default function SupportDownloadsPage() {
     const categories = [...new Set(downloads.map(d => d.categoryTag).filter(Boolean))] as string[];
     const filteredDownloads = filter ? downloads.filter(d => d.categoryTag === filter) : downloads;
 
+    const breadcrumbs = withHomeBreadcrumb('軟體下載');
+    const breadcrumbSchema = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(
+            breadcrumbs,
+            typeof window !== 'undefined' ? window.location.origin : '',
+            '/support/downloads',
+        ),
+    );
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
@@ -51,8 +63,13 @@ export default function SupportDownloadsPage() {
 
     return (
         <div className="flex flex-col w-full">
+            <JsonLdScript data={breadcrumbSchema} />
             {/* Blue Banner */}
-            <PageBanner title="軟體下載" subtitle="門禁、監視系統相關軟體與驅動程式" />
+            <PageBanner
+                title="軟體下載"
+                subtitle="門禁、監視系統相關軟體與驅動程式"
+                breadcrumbs={breadcrumbs}
+            />
 
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 py-10 w-full">

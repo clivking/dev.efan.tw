@@ -31,11 +31,11 @@ export const COMPANY = {
     phone: '02-7730-1158',
     email: 'safekings@gmail.com',
     address: '台北市大安區四維路14巷15號7樓之1',
-    tagline: '40年專業門禁×監視×總機整合｜超過2,600家企業信賴',
+    tagline: '42年專業門禁×監視×總機整合｜超過2,600家企業信賴',
     googleRating: 5.0,
     googleReviews: 18,
     googleViews: 7015,
-    yearsInBusiness: 40,
+    yearsInBusiness: 42,
     clientCount: 2600,
     googleBusiness: '台北安全王',
 } as const;

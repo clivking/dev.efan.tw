@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Calculator, Download, Lock, PlayCircle } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Calculator, Download, Lock, PlayCircle, Search } from 'lucide-react';
 import { SERVICES } from '@/lib/constants';
 import type { CategoryTree } from '@/lib/category-tree';
 import type { CompanyInfo } from '@/lib/company';
@@ -28,11 +28,13 @@ interface Props {
 }
 
 export default function HeaderMobileContent({ company: _company, categories = [] }: Props) {
+  const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -40,6 +42,13 @@ export default function HeaderMobileContent({ company: _company, categories = []
     setMobileResourcesOpen(false);
     setMobileExpandedCat(null);
   }, [pathname]);
+
+  const submitSearch = (event?: FormEvent) => {
+    event?.preventDefault();
+    const keyword = searchQuery.trim();
+    router.push(keyword ? `/search?q=${encodeURIComponent(keyword)}` : '/search');
+    setIsMenuOpen(false);
+  };
 
   return (
     <>
@@ -69,6 +78,25 @@ export default function HeaderMobileContent({ company: _company, categories = []
         style={{ flexBasis: '100%' }}
       >
         <div className="space-y-1 px-4 pt-2 pb-6">
+          <div className="pt-1">
+            <div className="mb-2 border-b border-gray-50 py-2 font-bold text-efan-primary">全站搜尋</div>
+            <form onSubmit={submitSearch} className="flex gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-2">
+              <div className="flex items-center pl-2 text-gray-400">
+                <Search className="h-4 w-4" strokeWidth={2.2} />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="搜尋產品、服務、指南"
+                className="w-full bg-transparent py-2 text-sm outline-none"
+              />
+              <button type="submit" className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-efan-primary">
+                前往
+              </button>
+            </form>
+          </div>
+
           <div className="pt-1">
             <button
               type="button"
@@ -164,6 +192,14 @@ export default function HeaderMobileContent({ company: _company, categories = []
                   <Link href="/tools/cctv-storage-calculator" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-gray-50">
                     <Calculator className="h-5 w-5 text-efan-primary" strokeWidth={1.8} />
                     <span className="font-medium text-gray-700">監視器容量計算</span>
+                  </Link>
+                  <Link href="/tools/cctv-focal-length-calculator" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-gray-50">
+                    <Calculator className="h-5 w-5 text-efan-primary" strokeWidth={1.8} />
+                    <span className="font-medium text-gray-700">監視器焦距計算</span>
+                  </Link>
+                  <Link href="/tools/access-control-quick-consultation" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-gray-50">
+                    <Calculator className="h-5 w-5 text-efan-primary" strokeWidth={1.8} />
+                    <span className="font-medium text-gray-700">門禁快速諮詢</span>
                   </Link>
                   <Link href="/support/downloads" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-gray-50">
                     <Download className="h-5 w-5 text-efan-primary" strokeWidth={1.8} />

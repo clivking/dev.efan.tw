@@ -40,7 +40,7 @@ export default function ClientLogos({
         ) : (
           <p className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 tracking-[0.2em] bg-white px-6 py-2 rounded-full shadow-sm border border-gray-100">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-            40年來服務超過 {company.clientCount.toLocaleString()} 家企業與場域
+            {company.yearsInBusiness}年來服務超過 {company.clientCount.toLocaleString()} 家企業與場域
           </p>
         )}
       </div>

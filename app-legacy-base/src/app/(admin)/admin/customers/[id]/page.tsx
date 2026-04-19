@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { formatMobile, formatPhone } from '@/lib/phone-format';
+import { cleanPhone, formatMobile, formatPhone } from '@/lib/phone-format';
 import MergeDialog from '@/components/admin/MergeDialog';
 import NotePreview from '@/components/admin/NotePreview';
 import QuoteStatusBadge from '@/components/admin/quotes/QuoteStatusBadge';
@@ -115,8 +115,8 @@ function ContactEditorDialog({
                     <div>
                         <label className="mb-1.5 block text-sm font-black text-gray-700">手機</label>
                         <input
-                            value={draft.mobile}
-                            onChange={(e) => onChange('mobile', e.target.value)}
+                            value={formatMobile(draft.mobile)}
+                            onChange={(e) => onChange('mobile', cleanPhone(e.target.value))}
                             className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm"
                             placeholder="09xx-xxx-xxx"
                         />
@@ -124,8 +124,8 @@ function ContactEditorDialog({
                     <div>
                         <label className="mb-1.5 block text-sm font-black text-gray-700">市話</label>
                         <input
-                            value={draft.phone}
-                            onChange={(e) => onChange('phone', e.target.value)}
+                            value={formatPhone(draft.phone)}
+                            onChange={(e) => onChange('phone', cleanPhone(e.target.value))}
                             className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm"
                             placeholder="02-xxxx-xxxx"
                         />
@@ -133,8 +133,8 @@ function ContactEditorDialog({
                     <div>
                         <label className="mb-1.5 block text-sm font-black text-gray-700">傳真</label>
                         <input
-                            value={draft.fax}
-                            onChange={(e) => onChange('fax', e.target.value)}
+                            value={formatPhone(draft.fax)}
+                            onChange={(e) => onChange('fax', cleanPhone(e.target.value))}
                             className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm"
                             placeholder="02-xxxx-xxxx"
                         />

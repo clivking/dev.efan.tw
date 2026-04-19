@@ -1,23 +1,26 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
+import { getCompanyInfo } from '@/lib/company';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { getLocationEntity, getLocationFaqEntities } from '@/lib/content-entities';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { buildBreadcrumbSchema, buildFaqSchema } from '@/lib/structured-data';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await getRequestSiteContext();
+  const [site, company] = await Promise.all([getRequestSiteContext(), getCompanyInfo()]);
   const location = getLocationEntity('daan-access-control');
 
   return buildContentMetadata({
     site,
     pathname: location?.href || '/locations/daan-access-control',
-    title: `${location?.name || '大安區門禁系統'}規劃、安裝與升級指南 | 一帆科技`,
+    title: `${location?.name || '大安區門禁系統'}規劃、安裝與升級指南｜${company.name}`,
     description:
       '大安區門禁系統怎麼規劃？整理商辦、診所、補習班與社區玄關常見的門禁安裝、訪客流程與對講整合重點，適合在地場域更新前盤點。',
-    siteName: '一帆科技',
+    siteName: company.name,
     type: 'website',
   });
 }
@@ -27,10 +30,10 @@ export default async function DaanAccessControlPage() {
   const location = getLocationEntity('daan-access-control');
   const faqItems = getLocationFaqEntities('daan-access-control');
   const faqSchema = buildFaqSchema(faqItems);
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: '服務地區', item: `${site.origin}/locations` },
-    { name: location?.name || '大安區門禁系統', item: `${site.origin}${location?.href || '/locations/daan-access-control'}` },
-  ]);
+  const breadcrumbs = withHomeBreadcrumb('服務地區', location?.name || '大安區門禁系統');
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    toBreadcrumbSchemaItems(breadcrumbs, site.origin, location?.href || '/locations/daan-access-control'),
+  );
 
   return (
     <div className="bg-[#f4f1ea] text-slate-900">
@@ -40,6 +43,7 @@ export default async function DaanAccessControlPage() {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-[minmax(0,1.05fr)_420px] lg:items-center">
           <div>
+            <BreadcrumbTrail items={breadcrumbs} tone="light" />
             <div className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-xs font-bold tracking-[0.22em] text-white">
               DAAN ACCESS CONTROL
             </div>

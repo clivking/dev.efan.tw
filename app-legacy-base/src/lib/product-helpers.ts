@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { normalizeImageSrc } from '@/lib/image-paths';
 
 /**
  * Get the main image URL for a single product.
@@ -13,7 +14,7 @@ export async function getProductMainImage(productId: string): Promise<string | n
         orderBy: { sortOrder: 'asc' },
         select: { filepath: true },
     });
-    return image?.filepath ?? null;
+    return image?.filepath ? normalizeImageSrc(image.filepath) : null;
 }
 
 /**
@@ -40,7 +41,7 @@ export async function getProductMainImages(
     for (const img of images) {
         if (img.entityId && !seen.has(img.entityId)) {
             seen.add(img.entityId);
-            map.set(img.entityId, img.filepath);
+            map.set(img.entityId, normalizeImageSrc(img.filepath));
         }
     }
 

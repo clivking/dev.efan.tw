@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(site.origin),
     title: { 
-      default: `${company.name} | 40年門禁專家`, 
+      default: `${company.name} | ${company.yearsInBusiness}年門禁專家`,
       template: `%s${company.siteTitleSuffix}` 
     },
     description: company.tagline,

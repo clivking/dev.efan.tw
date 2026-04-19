@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
 import { buildContentMetadata } from '@/lib/content-metadata';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { getCompanyInfo } from '@/lib/company';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
@@ -19,16 +22,6 @@ export async function generateMetadata(): Promise<Metadata> {
         type: 'website',
     });
 }
-
-/* export const metadata: Metadata = {
-    title: '一帆安全 | 指標客戶與成功實績 - 國家級與百大企業的信賴防線',
-    description: '從國防部、總統官邸到上市櫃科技大廠，一帆安全整合深耕 40 年，為台灣過2600家最具指標影響力的企業與機構，打造堅若磐石的企業門禁、監視防盜與雲端總機系統。',
-    openGraph: {
-        title: '一帆安全 | 指標客戶與成功實績 - 國家機構指定廠商',
-        description: '40 年深耕，國家最高機關與百大企業的信賴防線。為國防部、總統官邸、台灣捷太格特電子等打造頂級聯網安防系統。',
-        url: '/about/clients',
-    }
-}; */
 
 const CATEGORIES = [
     {
@@ -106,6 +99,7 @@ const CATEGORIES = [
 ];
 
 export default async function ClientsPage() {
+    const company = await getCompanyInfo();
     const site = await getRequestSiteContext();
     const jsonLd = {
         "@context": "https://schema.org",
@@ -132,7 +126,7 @@ export default async function ClientsPage() {
         "brand": {
             "@type": "Brand",
             "name": "一帆安全",
-            "slogan": "40年深耕，國家機構與百大企業的信賴防線"
+            "slogan": `${company.yearsInBusiness}年深耕，國家機構與百大企業的信賴防線`
         },
         "owns": CATEGORIES.flatMap(cat => cat.clients).map(client => ({
             "@type": "Service",
@@ -143,10 +137,8 @@ export default async function ClientsPage() {
             }
         }))
     };
-    const breadcrumbSchema = buildBreadcrumbSchema([
-        { name: '關於一帆', item: `${site.origin}/about` },
-        { name: '客戶實績', item: `${site.origin}/about/clients` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb({ label: '關於一帆', href: '/about' }, '客戶實績');
+    const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, '/about/clients'));
 
     return (
         <main className="min-h-screen bg-slate-50 flex flex-col">
@@ -159,6 +151,7 @@ export default async function ClientsPage() {
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-rose-900/30 via-slate-800/20 to-transparent rounded-full blur-[100px] mix-blend-screen -z-10 -translate-x-1/3 translate-y-1/3 hidden md:block"></div>
                 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-in fade-in zoom-in-95 duration-1000">
+                    <BreadcrumbTrail items={breadcrumbs} tone="dark" className="mb-8" />
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700 text-slate-300 text-sm font-bold mb-8 tracking-wider shadow-inner backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                         Trusted by <span className="text-white">2,600+</span> Organizations
@@ -172,7 +165,7 @@ export default async function ClientsPage() {
                     </h1>
                     
                     <p className="text-lg md:text-xl text-slate-300 max-w-4xl mx-auto font-medium leading-relaxed drop-shadow px-4">
-                        從<span className="text-white font-bold">中華民國國防部</span>、<span className="text-white font-bold">總統官邸</span>的多層安防，到 <span className="text-white font-bold">Nikon</span> 與 <span className="text-white font-bold">台灣壽司郎</span> 的連鎖門市；從 <span className="text-white font-bold">全國商業總會</span> 到上市櫃電子大廠。一帆安全專注弱電整合 40 年，始終堅持穩定可靠的施工品質，為台灣各界指標性機構建構安全、安心的基礎通訊與安防網絡。
+                        從<span className="text-white font-bold">中華民國國防部</span>、<span className="text-white font-bold">總統官邸</span>的多層安防，到 <span className="text-white font-bold">Nikon</span> 與 <span className="text-white font-bold">台灣壽司郎</span> 的連鎖門市；從 <span className="text-white font-bold">全國商業總會</span> 到上市櫃電子大廠。一帆安全專注弱電整合 {company.yearsInBusiness} 年，始終堅持穩定可靠的施工品質，為台灣各界指標性機構建構安全、安心的基礎通訊與安防網絡。
                     </p>
                 </div>
             </section>
@@ -298,7 +291,7 @@ export default async function ClientsPage() {
                         href="/quote-request" 
                         className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-900 font-black text-lg px-10 py-5 rounded-full shadow-[0_8px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_45px_rgba(16,185,129,0.6)] hover:-translate-y-1 transition-all duration-300"
                     >
-                        聯絡 40 年經驗的一帆團隊
+                        聯絡 {company.yearsInBusiness} 年經驗的一帆團隊
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>

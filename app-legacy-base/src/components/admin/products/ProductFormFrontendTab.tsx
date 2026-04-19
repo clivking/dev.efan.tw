@@ -4,6 +4,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import { ADMIN_PRODUCT_COPY } from '@/lib/admin-product-copy';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 import { Card, Label, SectionHeader, inputClass, inputSmClass, listToTextarea, textareaToList } from './productFormShared';
 
 const RichEditor = dynamic(() => import('@/components/admin/RichEditor'), {
@@ -245,7 +246,7 @@ export default function ProductFormFrontendTab(props: ProductFormFrontendTabProp
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {websiteImages.map((img, index) => (
                                 <div key={img.id} draggable onDragStart={() => handleDragStart(index)} onDragOver={(e) => handleDragOver(e, index)} onDragEnd={handleDragEnd} className={`aspect-square rounded-xl bg-gray-50 border-2 relative group/img overflow-hidden cursor-grab active:cursor-grabbing transition-all ${dragIndex === index ? 'border-emerald-500 scale-95 opacity-50' : 'border-gray-100 hover:border-emerald-300'} ${index === 0 ? 'ring-2 ring-emerald-500 ring-offset-2' : ''}`}>
-                                    <Image src={img.filepath} alt={img.filename} fill sizes="(min-width: 768px) 25vw, 50vw" className="w-full h-full object-cover" />
+                                    <Image src={img.filepath} alt={img.filename} fill sizes="(min-width: 768px) 25vw, 50vw" unoptimized={shouldBypassImageOptimization(img.filepath)} className="w-full h-full object-cover" />
                                     {index === 0 && <div className="absolute top-1.5 left-1.5 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-lg">{ADMIN_PRODUCT_COPY.form.frontend.websiteImageMain}</div>}
                                     <button type="button" onClick={() => handleDeleteWebsiteImage(img.id)} className="absolute top-1.5 right-1.5 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover/img:opacity-100 transition-opacity hover:bg-red-600">{ADMIN_PRODUCT_COPY.form.removeLine}</button>
                                 </div>
@@ -270,7 +271,7 @@ export default function ProductFormFrontendTab(props: ProductFormFrontendTabProp
                                 {contentImages.map((img, index) => (
                                     <div key={img.id} draggable onDragStart={() => handleContentDragStart(index)} onDragOver={(e) => handleContentDragOver(e, index)} onDragEnd={handleContentDragEnd} className={`relative overflow-hidden rounded-2xl border-2 bg-gray-50 transition-all ${contentDragIndex === index ? 'border-emerald-500 scale-[0.99] opacity-60' : 'border-gray-100 hover:border-emerald-300'}`}>
                                         <div className="relative aspect-[16/9] bg-[linear-gradient(180deg,#f8fafc,#eef2f7)] p-3">
-                                            <Image src={img.filepath} alt={img.filename} fill sizes="(min-width: 1024px) 66vw, 100vw" className={img.displayMode === 'cover' ? 'object-cover' : 'object-contain p-3'} />
+                                            <Image src={img.filepath} alt={img.filename} fill sizes="(min-width: 1024px) 66vw, 100vw" unoptimized={shouldBypassImageOptimization(img.filepath)} className={img.displayMode === 'cover' ? 'object-cover' : 'object-contain p-3'} />
                                         </div>
                                         <div className="flex items-center justify-between gap-3 border-t border-gray-100 bg-white/90 px-4 py-3">
                                             <div className="min-w-0">

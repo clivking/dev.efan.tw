@@ -2,13 +2,16 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import GuideToc from '@/components/common/GuideToc';
 import JsonLdScript from '@/components/common/JsonLdScript';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { getCompanyInfo } from '@/lib/company';
 import { getServiceEntitiesBySlugs, getServiceLabel } from '@/lib/content-entities';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPublishedGuideBySlug } from '@/lib/guide-content';
 import { GUIDE_CONTENT_TYPE_LABELS, GUIDE_SEARCH_INTENT_LABELS } from '@/lib/guide-schema';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 import { prisma } from '@/lib/prisma';
 import { getProductMainImages } from '@/lib/product-helpers';
 import { getRequestSiteContext } from '@/lib/site-url';
@@ -259,11 +262,8 @@ export default async function GuideDetailPage({ params }: Props) {
     speakableCssSelectors: ['#guide-headline', '#guide-body'],
   });
 
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: '首頁', item: `${site.origin}/` },
-    { name: '知識指南', item: `${site.origin}/guides` },
-    { name: guide.title, item: `${site.origin}/guides/${guide.slug}` },
-  ]);
+  const breadcrumbs = withHomeBreadcrumb({ label: '知識指南', href: '/guides' }, titleParts.lead);
+  const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, `/guides/${guide.slug}`));
 
   const faqSchema = buildFaqSchema(guide.faqItems);
 
@@ -280,6 +280,7 @@ export default async function GuideDetailPage({ params }: Props) {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-14">
             <div className="min-w-0">
               <div className="mt-8 max-w-5xl">
+                <BreadcrumbTrail items={breadcrumbs} tone="dark" className="mb-6" />
                 <div className="text-[11px] font-black tracking-[0.28em] text-slate-300 md:text-xs">EFAN DECISION GUIDE</div>
                 <h1 id="guide-headline" className="mt-4 max-w-none text-4xl font-black leading-[1.04] tracking-[-0.04em] text-white md:text-6xl">
                   {guide.title}
@@ -302,17 +303,6 @@ export default async function GuideDetailPage({ params }: Props) {
           <div className="min-w-0">
           <section className="mb-10 grid gap-5 rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-sm md:p-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-8">
             <div>
-              <nav className="flex flex-wrap items-center gap-y-2 text-sm leading-7 text-slate-500">
-                <Link href="/" className="font-medium text-slate-700 transition hover:text-slate-950">
-                  首頁
-                </Link>
-                <span className="mx-2 text-slate-300">/</span>
-                <Link href="/guides" className="font-medium text-slate-700 transition hover:text-slate-950">
-                  知識指南
-                </Link>
-                <span className="mx-2 text-slate-300">/</span>
-                <span className="font-medium text-slate-700">{titleParts.lead}</span>
-              </nav>
               <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold tracking-[0.16em] md:text-xs">
                 <span className="rounded-full border border-slate-200 bg-stone-50 px-3 py-1.5 text-slate-700">
                   {GUIDE_CONTENT_TYPE_LABELS[guide.contentType] || guide.contentType}
@@ -327,7 +317,7 @@ export default async function GuideDetailPage({ params }: Props) {
               {titleParts.remainder ? <div className="mt-4 text-sm leading-7 text-slate-600">{`${GUIDE_CONTENT_TYPE_LABELS[guide.contentType] || guide.contentType}：${titleParts.remainder}`}</div> : null}
               <div className="mt-6 text-sm font-bold tracking-[0.18em] text-slate-400">ARTICLE INFO</div>
               <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
-                <span className="font-medium text-slate-700">作者：{guide.authorName || '一帆科技'}</span>
+                <span className="font-medium text-slate-700">作者：{guide.authorName || company.name}</span>
                 <span>發布：{formatDate(guide.publishedAt || guide.createdAt)}</span>
                 <span>更新：{formatDateTime(guide.reviewedAt || guide.updatedAt)}</span>
                 <span>章節：{articleContent.headings.length} 個重點章節</span>
@@ -468,7 +458,7 @@ export default async function GuideDetailPage({ params }: Props) {
                           src={product.imageUrl}
                           alt={product.name}
                           fill
-                          unoptimized={product.imageUrl.startsWith('/api/uploads/products/')}
+                          unoptimized={shouldBypassImageOptimization(product.imageUrl)}
                           className="object-contain p-4"
                           sizes="(min-width: 768px) 33vw, 100vw"
                         />

@@ -4,15 +4,18 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Image from 'next/image';
 import sanitizeHtml from 'sanitize-html';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
 import ProductBadges from '@/components/products/ProductBadges';
 import ProductTabs from '@/components/products/ProductTabs';
 import { getCompanyInfo } from '@/lib/company';
 import { buildContentMetadata } from '@/lib/content-metadata';
+import { toBreadcrumbSchemaItems } from '@/lib/breadcrumbs';
 import { PRODUCT_PAGE_COPY } from '@/lib/product-page-copy';
 import { prisma } from '@/lib/prisma';
 import { getProductMainImage, getProductMainImages, stripHtml } from '@/lib/product-helpers';
 import { getRequestSiteContext, toAbsoluteUrl } from '@/lib/site-url';
+import { normalizeImageSrc, shouldBypassImageOptimization } from '@/lib/image-paths';
 import { buildBreadcrumbSchema, buildFaqSchema, buildProductSchema } from '@/lib/structured-data';
 import { renderContent } from '@/lib/tiptap';
 import ProductDetailClient from './ProductDetailClient';
@@ -446,8 +449,8 @@ export default async function ProductDetailPage({ params }: Props) {
 
     const categorySlug = product.category?.seoSlug || product.category?.id || '';
     const mainImage = websiteImages.length > 0 ? websiteImages[0].filepath : null;
-    const galleryImages = websiteImages.map((image) => image.filepath);
-    const absoluteImages = websiteImages.map((image) => toAbsoluteUrl(image.filepath, site.origin));
+    const galleryImages = websiteImages.map((image) => normalizeImageSrc(image.filepath));
+    const absoluteImages = websiteImages.map((image) => toAbsoluteUrl(normalizeImageSrc(image.filepath), site.origin));
     const absoluteMainImage = mainImage ? toAbsoluteUrl(mainImage, site.origin) : null;
     const imageStoryItems = websiteImages
         .map((image, index) => ({
@@ -544,14 +547,15 @@ export default async function ProductDetailPage({ params }: Props) {
             .filter(Boolean) as Array<{ question: string; answer: string }>,
     );
 
-    const breadcrumbJsonLd = buildBreadcrumbSchema([
-        { name: PRODUCT_PAGE_COPY.breadcrumbHome, item: site.origin },
-        { name: PRODUCT_PAGE_COPY.breadcrumbProducts, item: `${site.origin}/products` },
-        ...(product.category
-            ? [{ name: product.category.name, item: `${site.origin}/products/category/${categorySlug}` }]
-            : []),
-        { name: product.name, item: `${site.origin}/products/${product.seoSlug}` },
-    ]);
+    const breadcrumbs = [
+        { label: PRODUCT_PAGE_COPY.breadcrumbHome, href: '/' },
+        { label: PRODUCT_PAGE_COPY.breadcrumbProducts, href: '/products' },
+        ...(product.category ? [{ label: product.category.name, href: `/products/category/${categorySlug}` }] : []),
+        { label: product.model || product.name },
+    ];
+    const breadcrumbJsonLd = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(breadcrumbs, site.origin, `/products/${product.seoSlug}`),
+    );
 
     const tabs: Array<{ key: string; label: string; content: ReactNode }> = [];
 
@@ -838,25 +842,11 @@ export default async function ProductDetailPage({ params }: Props) {
                 <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid items-stretch gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
                         <div className="order-1 flex min-h-full flex-col justify-start">
-    <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-white/72">
-        <Link href="/" className="transition-colors hover:text-white">
-            {PRODUCT_PAGE_COPY.breadcrumbHome}
-        </Link>
-        <span>/</span>
-        <Link href="/products" className="transition-colors hover:text-white">
-            {PRODUCT_PAGE_COPY.breadcrumbProducts}
-        </Link>
-        {product.category ? (
-            <>
-                <span>/</span>
-                <Link href={`/products/category/${categorySlug}`} className="transition-colors hover:text-white">
-                    {product.category.name}
-                </Link>
-                <span>/</span>
-                <span className="text-white">{product.model || product.name}</span>
-            </>
-        ) : null}
-    </nav>
+    <BreadcrumbTrail
+        items={breadcrumbs}
+        tone="dark"
+        className="mb-6"
+    />
 
     <div className="relative w-full">
         <ProductImageGallery
@@ -923,11 +913,12 @@ export default async function ProductDetailPage({ params }: Props) {
                             >
                                 <div className="relative aspect-[16/9] bg-[linear-gradient(180deg,#ffffff,#f8fafc)] p-4 sm:p-5">
                                     <Image
-                                        src={image.filepath}
+                                        src={normalizeImageSrc(image.filepath)}
                                         alt={`${product.name} ${PRODUCT_PAGE_COPY.imageGallerySuffix} ${index + 1}`}
                                         fill
                                         sizes="(min-width: 1280px) 1280px, 100vw"
                                         quality={90}
+                                        unoptimized={shouldBypassImageOptimization(image.filepath)}
                                         className={`${image.displayMode === 'cover' ? 'object-cover' : 'object-contain p-2 sm:p-3'}`}
                                     />
                                 </div>
@@ -1000,10 +991,11 @@ export default async function ProductDetailPage({ params }: Props) {
                                                     <div className="relative h-24 w-24 flex-none overflow-hidden rounded-[20px] bg-[radial-gradient(circle_at_top,#f8fbff,white_60%,#eef2f7)]">
                                                         {item.imageUrl ? (
                                                             <Image
-                                                                src={item.imageUrl}
+                                                                src={normalizeImageSrc(item.imageUrl)}
                                                                 alt={item.name}
                                                                 fill
                                                                 sizes="96px"
+                                                                unoptimized={shouldBypassImageOptimization(item.imageUrl)}
                                                                 className="object-contain p-3"
                                                             />
                                                         ) : (

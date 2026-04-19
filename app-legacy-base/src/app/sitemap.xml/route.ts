@@ -35,6 +35,8 @@ export async function GET() {
         { loc: '/products', changefreq: 'weekly', priority: '0.9' },
         { loc: '/tools', changefreq: 'monthly', priority: '0.7' },
         { loc: '/tools/cctv-storage-calculator', changefreq: 'weekly', priority: '0.8' },
+        { loc: '/tools/cctv-focal-length-calculator', changefreq: 'weekly', priority: '0.8' },
+        { loc: '/tools/access-control-quick-consultation', changefreq: 'weekly', priority: '0.8' },
         { loc: '/support/downloads', changefreq: 'monthly', priority: '0.6' },
         { loc: '/quote-request', changefreq: 'monthly', priority: '0.8' },
     ];

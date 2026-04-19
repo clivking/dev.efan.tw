@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useInquiry } from '@/components/products/InquiryContext';
 import { Turnstile } from '@marsidev/react-turnstile';
 import PageBanner from '@/components/common/PageBanner';
+import { normalizeImageSrc, shouldBypassImageOptimization } from '@/lib/image-paths';
+import { withHomeBreadcrumb } from '@/lib/breadcrumbs';
 
 export default function InquiryPageClient() {
     const { items, removeItem, updateQuantity, clearAll, totalCount } = useInquiry();
@@ -93,7 +95,11 @@ export default function InquiryPageClient() {
     return (
         <div className="flex flex-col w-full">
             {/* Hero */}
-            <PageBanner title="您的詢價清單" subtitle="選好產品後填寫聯絡資訊即可送出" />
+            <PageBanner
+                title="您的詢價清單"
+                subtitle="選好產品後填寫聯絡資訊即可送出"
+                breadcrumbs={withHomeBreadcrumb({ label: '產品目錄', href: '/products' }, '詢價清單')}
+            />
 
             <section className="py-12 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -125,9 +131,10 @@ export default function InquiryPageClient() {
                                                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl flex-shrink-0 relative overflow-hidden border border-gray-100">
                                                     {item.imageUrl ? (
                                                         <Image
-                                                            src={item.imageUrl}
+                                                            src={normalizeImageSrc(item.imageUrl)}
                                                             alt={item.name}
                                                             fill
+                                                            unoptimized={shouldBypassImageOptimization(item.imageUrl)}
                                                             className="object-contain p-1"
                                                             sizes="80px"
                                                         />

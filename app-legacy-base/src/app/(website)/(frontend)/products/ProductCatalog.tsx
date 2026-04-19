@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ProductCard from '@/components/products/ProductCard';
 import type { CategoryTree, FilterableSpec } from '@/lib/category-tree';
 
@@ -40,6 +41,8 @@ interface Props {
     categories: CategoryTree[];
     activeCategory?: string;
     activeSubCategory?: string;
+    initialSearch?: string;
+    searchBasePath?: string;
 }
 
 function getSpecValue(product: Product, key: string): string | null {
@@ -54,8 +57,17 @@ function getSpecValue(product: Product, key: string): string | null {
     return null;
 }
 
-export default function ProductCatalog({ initialProducts, categories, activeCategory, activeSubCategory }: Props) {
-    const [search, setSearch] = useState('');
+export default function ProductCatalog({
+    initialProducts,
+    categories,
+    activeCategory,
+    activeSubCategory,
+    initialSearch = '',
+    searchBasePath = '/products',
+}: Props) {
+    const router = useRouter();
+    const normalizedInitialSearch = initialSearch.trim();
+    const [search, setSearch] = useState(normalizedInitialSearch);
     const [searchResults, setSearchResults] = useState<Product[] | null>(null);
     const [isSearching, setIsSearching] = useState(false);
     const [specFilters, setSpecFilters] = useState<Record<string, string[]>>({});
@@ -81,6 +93,10 @@ export default function ProductCatalog({ initialProducts, categories, activeCate
 
         return [];
     }, [categories, currentSlug]);
+
+    useEffect(() => {
+        setSearch(normalizedInitialSearch);
+    }, [normalizedInitialSearch]);
 
     useEffect(() => {
         const keyword = search.trim();
@@ -121,6 +137,21 @@ export default function ProductCatalog({ initialProducts, categories, activeCate
             clearTimeout(timer);
         };
     }, [search]);
+
+    useEffect(() => {
+        const trimmed = search.trim();
+        const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+
+        if (trimmed) {
+            params.set('search', trimmed);
+        } else {
+            params.delete('search');
+        }
+
+        const query = params.toString();
+        const nextUrl = query ? `${searchBasePath}?${query}` : searchBasePath;
+        router.replace(nextUrl, { scroll: false });
+    }, [router, search, searchBasePath]);
 
     const searchBaseProducts = useMemo(
         () => (search.trim() ? searchResults || [] : initialProducts),

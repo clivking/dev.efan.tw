@@ -176,7 +176,7 @@ export async function GET(
             phone: await getSetting('company_phone', '02-7730-1158'),
             email: await getSetting('company_email', 'safekings@gmail.com'),
             address: await getSetting('company_address', '台北市大安區四維路14巷15號7樓之1'),
-            logoUrl: await getSetting('pdf_logo_url', '') || await getSetting('company_logo_url', '/uploads/logo.png'),
+            logoUrl: await getSetting('pdf_logo_url', '') || await getSetting('company_logo_url', '/images/logo.png'),
             stampUrl: await getSetting('company_stamp_url', ''),
         };
 

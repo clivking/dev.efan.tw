@@ -113,7 +113,8 @@ function QuotesPageContent() {
                 body: JSON.stringify({ name: '新案件' }),
             });
             if (!res.ok) {
-                toast.error('建立案件失敗');
+                const data = await res.json().catch(() => ({}));
+                toast.error(data.error || '建立案件失敗');
                 setCreating(false);
                 return;
             }

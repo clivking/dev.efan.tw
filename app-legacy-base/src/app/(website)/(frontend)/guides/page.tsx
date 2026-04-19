@@ -1,9 +1,15 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import JsonLdScript from '@/components/common/JsonLdScript';
+import { getCompanyInfo } from '@/lib/company';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPublishedGuides } from '@/lib/guide-content';
 import { GUIDE_CONTENT_TYPE_LABELS } from '@/lib/guide-schema';
 import { GUIDE_TOPIC_CONFIGS, getGuideTopicKey } from '@/lib/guide-topics';
 import { getRequestSiteContext } from '@/lib/site-url';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 type Props = {
   searchParams?: Promise<{ topic?: string }>;
@@ -36,35 +42,34 @@ function formatGuideType(type: string) {
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const site = await getRequestSiteContext();
+  const [site, company] = await Promise.all([getRequestSiteContext(), getCompanyInfo()]);
   const params = (await searchParams) || {};
   const activeTopic = GUIDE_TOPIC_CONFIGS.find((item) => item.key === params.topic) || null;
-  const title = activeTopic ? `${activeTopic.label}指南 | 一帆科技` : '知識指南 | 一帆科技';
+  const title = activeTopic ? `${activeTopic.label}指南與採購重點整理｜${company.name}` : `知識指南與採購判斷整理｜${company.name}`;
   const description = activeTopic
-    ? `整理 ${activeTopic.label} 的採購重點、規劃流程、比較文與常見問題。`
+    ? `整理 ${activeTopic.label} 的採購重點、規劃流程、比較文與常見問題，協助企業在導入或升級前快速收斂方向。`
     : '集中整理門禁、對講、電話總機、監視與弱電整合的採購指南、比較文、案例與 FAQ。';
 
-  const canonical = activeTopic ? `${site.origin}/guides?topic=${activeTopic.key}` : `${site.origin}/guides`;
-
-  return {
-    title: { absolute: title },
+  return buildContentMetadata({
+    site,
+    pathname: activeTopic ? `/guides/topic/${activeTopic.key}` : '/guides',
+    title,
     description,
-    alternates: { canonical },
-    openGraph: {
-      title,
-      description,
-      url: canonical,
-      type: 'website',
-      locale: 'zh_TW',
-      siteName: '一帆科技',
-    },
-  };
+    siteName: company.name,
+    type: 'website',
+  });
 }
 
 export default async function GuidesPage({ searchParams }: Props) {
   const params = (await searchParams) || {};
-  const guides = await getPublishedGuides();
+  const [site, guides] = await Promise.all([getRequestSiteContext(), getPublishedGuides()]);
   const activeTopic = GUIDE_TOPIC_CONFIGS.find((item) => item.key === params.topic) || null;
+  const breadcrumbs = activeTopic
+    ? withHomeBreadcrumb({ label: '知識指南', href: '/guides' }, activeTopic.label)
+    : withHomeBreadcrumb('知識指南');
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    toBreadcrumbSchemaItems(breadcrumbs, site.origin, activeTopic ? `/guides/topic/${activeTopic.key}` : '/guides'),
+  );
 
   const filteredGuides = activeTopic
     ? guides.filter((guide) => getGuideTopicKey(guide.topic) === activeTopic.key)
@@ -81,11 +86,13 @@ export default async function GuidesPage({ searchParams }: Props) {
 
   return (
     <div className="bg-[#f4f1ea] text-slate-900">
+      <JsonLdScript data={breadcrumbSchema} />
       <section className="relative overflow-hidden border-b border-slate-200 bg-[linear-gradient(135deg,#0f172a_0%,#172554_45%,#1e293b_100%)] text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(251,191,36,0.18),transparent_22%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
           <div className="max-w-4xl">
             <div>
+              <BreadcrumbTrail items={breadcrumbs} tone="dark" className="mb-6" />
               <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.24em] text-amber-200">
                 EFAN RESOURCE CENTER
               </div>

@@ -1,9 +1,5 @@
-import Link from 'next/link';
-
-interface BreadcrumbItem {
-    label: string;
-    href?: string;
-}
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import { BreadcrumbItem } from '@/lib/breadcrumbs';
 
 interface PageBannerProps {
     title: string;
@@ -25,22 +21,7 @@ export default function PageBanner({ title, subtitle, breadcrumbs }: PageBannerP
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center w-full">
                 
                 {/* Modern Pill-Shaped Breadcrumbs */}
-                {breadcrumbs && breadcrumbs.length > 0 && (
-                    <nav className="inline-flex items-center bg-white/5 border border-white/10 rounded-full px-5 py-2 mb-8 backdrop-blur-md shadow-2xl">
-                        {breadcrumbs.map((crumb, i) => (
-                            <span key={i} className="flex items-center text-xs sm:text-sm font-medium tracking-wide">
-                                {i > 0 && <span className="mx-2 text-white/30">/</span>}
-                                {crumb.href ? (
-                                    <Link href={crumb.href} className="text-gray-400 hover:text-white transition-all duration-300">
-                                        {crumb.label}
-                                    </Link>
-                                ) : (
-                                    <span className="text-white drop-shadow-md">{crumb.label}</span>
-                                )}
-                            </span>
-                        ))}
-                    </nav>
-                )}
+                {breadcrumbs && breadcrumbs.length > 0 ? <BreadcrumbTrail items={breadcrumbs} tone="dark" className="mb-8" /> : null}
 
                 {/* Majestic Title & Subtitle */}
                 <div className="w-full max-w-5xl mx-auto">

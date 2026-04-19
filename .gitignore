@@ -15,6 +15,9 @@ import-review/code-old/**
 !import-review/code-old/README.md
 import-review/db-old/*.sql
 
+# Local backup packages
+backup/
+
 # Legacy app local assets
 app-legacy-base/public/uploads/**
 !app-legacy-base/public/uploads/

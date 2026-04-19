@@ -8,10 +8,15 @@ import { prisma } from '@/lib/prisma';
 import { getProductMainImages } from '@/lib/product-helpers';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { buildBreadcrumbSchema, buildCollectionPageSchema } from '@/lib/structured-data';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import ProductCatalog from './ProductCatalog';
 import PageBanner from '@/components/common/PageBanner';
 
 export const dynamic = 'force-dynamic';
+
+type Props = {
+    searchParams?: Promise<{ search?: string }>;
+};
 
 export async function generateMetadata(): Promise<Metadata> {
     const company = await getCompanyInfo();
@@ -105,16 +110,16 @@ async function getProductsData() {
     };
 }
 
-export default async function ProductsPage() {
+export default async function ProductsPage({ searchParams }: Props) {
     const { products, categories } = await getProductsData();
     const company = await getCompanyInfo();
     const site = await getRequestSiteContext();
     const baseUrl = site.origin;
+    const params = (await searchParams) || {};
+    const initialSearch = typeof params.search === 'string' ? params.search : '';
 
-    const breadcrumbLd = buildBreadcrumbSchema([
-        { name: '首頁', item: baseUrl },
-        { name: '產品目錄', item: `${baseUrl}/products` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb('產品目錄');
+    const breadcrumbLd = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, baseUrl, '/products'));
 
     const collectionLd = buildCollectionPageSchema({
         url: `${baseUrl}/products`,
@@ -136,9 +141,10 @@ export default async function ProductsPage() {
             <PageBanner
                 title="產品目錄"
                 subtitle={`整理常見設備類型、應用情境與熱門型號，協助你更快找到適合的門禁、對講與整合產品。`}
+                breadcrumbs={breadcrumbs}
             />
 
-            <ProductCatalog initialProducts={products} categories={categories} />
+            <ProductCatalog initialProducts={products} categories={categories} initialSearch={initialSearch} searchBasePath="/products" />
 
             <section className="border-t border-gray-100 bg-gray-50 py-20 text-center">
                 <div className="mx-auto max-w-4xl px-4">

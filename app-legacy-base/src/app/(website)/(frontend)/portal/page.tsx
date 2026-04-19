@@ -4,7 +4,10 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import JsonLdScript from '@/components/common/JsonLdScript';
 import PageBanner from '@/components/common/PageBanner';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 interface Video {
     id: string;
@@ -58,6 +61,15 @@ export default function PortalPage() {
     const categories = [...new Set(videos.map(v => v.categoryTag).filter(Boolean))] as string[];
     const filteredVideos = filter ? videos.filter(v => v.categoryTag === filter) : videos;
 
+    const breadcrumbs = withHomeBreadcrumb('教學專區');
+    const breadcrumbSchema = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(
+            breadcrumbs,
+            typeof window !== 'undefined' ? window.location.origin : '',
+            '/portal',
+        ),
+    );
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
@@ -68,11 +80,13 @@ export default function PortalPage() {
 
     return (
         <div className="flex flex-col w-full">
+            <JsonLdScript data={breadcrumbSchema} />
             {/* Blue Banner */}
             <div className="relative">
                 <PageBanner
                     title="獨家教學影片"
                     subtitle={`歡迎，${user?.displayName || ''}${user?.companyName ? `（${user.companyName}）` : ''}`}
+                    breadcrumbs={breadcrumbs}
                 />
                 <div className="absolute top-6 right-8 z-10">
                     <button

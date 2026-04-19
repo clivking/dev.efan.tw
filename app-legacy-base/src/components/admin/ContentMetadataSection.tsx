@@ -2,6 +2,7 @@
 
 import {
   SEO_DESCRIPTION_SOFT_LIMIT,
+  DEFAULT_OG_IMAGE_PATH,
   countSeoDescriptionCharacters,
   type SharedContentMetadata,
   type SharedContentMetadataChangeHandler,
@@ -161,7 +162,7 @@ export default function ContentMetadataSection({
                 value={value.ogImage || ''}
                 onChange={(event) => onChange('ogImage', event.target.value)}
                 className={inputClassName}
-                placeholder="/uploads/og-image.webp"
+                placeholder={DEFAULT_OG_IMAGE_PATH}
               />
             </Field>
           </div>

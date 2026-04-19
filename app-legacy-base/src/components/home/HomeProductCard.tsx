@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { normalizeImageSrc, shouldBypassImageOptimization } from '@/lib/image-paths';
 
 interface HomeProductCardProps {
     id: string;
@@ -30,19 +31,20 @@ export default function HomeProductCard({
     isNew,
 }: HomeProductCardProps) {
     const productUrl = `/products/${slug}`;
-    const isProductUpload = typeof imageUrl === 'string' && imageUrl.startsWith('/api/uploads/products/');
+    const normalizedImageUrl = normalizeImageSrc(imageUrl);
+    const shouldBypassOptimization = shouldBypassImageOptimization(normalizedImageUrl);
 
     return (
         <article className="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-efan-primary/20 transition-all duration-300">
             <Link href={productUrl} className="block">
                 <div className="aspect-[4/3] bg-gray-50 relative overflow-hidden">
-                    {imageUrl ? (
+                    {normalizedImageUrl ? (
                         <Image
-                            src={imageUrl}
+                            src={normalizedImageUrl}
                             alt={`${brand || ''} ${model || ''} ${name}`}
                             fill
                             priority={priority}
-                            unoptimized={isProductUpload}
+                            unoptimized={shouldBypassOptimization}
                             className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />

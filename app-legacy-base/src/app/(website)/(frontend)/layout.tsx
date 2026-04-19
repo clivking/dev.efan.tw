@@ -1,6 +1,5 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ClientFeatures from './ClientFeatures';
 import { getCompanyInfo } from '@/lib/company';
 import { getCategoryTree } from '@/lib/category-tree';
@@ -24,7 +23,6 @@ export default async function FrontendLayout({
       </main>
       <Footer company={company} />
       <ClientFeatures />
-      <Breadcrumbs />
     </InquiryProvider>
   );
 }

@@ -3,6 +3,9 @@
 ## Priority 1
 
 - document the current `dev` runtime as the new baseline
+- implement canonical product upload paths and block new flat product asset paths
+- add an uploads mount and critical asset health gate before public dev traffic is considered healthy
+- wire `scripts/check-dev-uploads-mount.sh` into the standard post-deploy smoke flow
 - finish conservative script cleanup in `app-legacy-base/scripts`
 - write settings/env/secrets governance rules
 - write DB backup/restore/sync-down runbook
@@ -15,7 +18,7 @@
 
 ## Priority 3
 
-- add uploads integrity audit
+- expand uploads integrity audit to report missing references, unreferenced files, canonical path violations, and quarantine candidates
 - add release history log
 - add rollback checklist
 - reduce duplicate seed/fix/import scripts

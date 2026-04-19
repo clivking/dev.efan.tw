@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { authenticateUser, signToken } from '@/lib/auth';
+import { getSetting, setSetting } from '@/lib/settings';
+import { normalizeIpAddress, parseIpList } from '@/lib/ip';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -49,17 +51,17 @@ export async function POST(request: NextRequest) {
 
     // Automatically record this IP into the dynamic exclusion list
     try {
-        const { getSetting, setSetting } = await import('@/lib/settings');
-        const ipAddressRaw = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const clientIp = String(ipAddressRaw).split(',')[0].trim();
-        
+        const ipAddressRaw = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+        const clientIp = normalizeIpAddress(ipAddressRaw);
+
         if (clientIp !== 'unknown') {
             const currentList = await getSetting('dynamic_admin_ips', '');
-            const ipList = currentList.split(',').map(i => i.trim()).filter(Boolean);
-            
+            const ipList = parseIpList(currentList);
+
             if (!ipList.includes(clientIp)) {
-                // Keep only last 10 IPs to avoid infinite growth
-                const newList = [clientIp, ...ipList].slice(0, 10);
+                // Keep a longer rolling window so previous admin IPs do not
+                // quickly fall out of the exclusion list.
+                const newList = [clientIp, ...ipList].slice(0, 100);
                 await setSetting('dynamic_admin_ips', newList.join(','), 'string');
             }
         }

@@ -55,23 +55,12 @@ export default function DocumentUploader({ productId, documents, onUpdate }: Doc
         try {
             const fd = new FormData();
             fd.append('file', file);
-
-            const uploadRes = await fetch('/api/upload/document', { method: 'POST', body: fd });
-            const uploadData = await uploadRes.json();
-            if (!uploadRes.ok) throw new Error(uploadData.error || '檔案上傳失敗');
-
+            fd.append('title', uploadTitle);
+            fd.append('description', uploadDesc);
+            fd.append('docType', uploadType);
             const docRes = await fetch(`/api/products/${productId}/documents`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    filepath: uploadData.filepath,
-                    filename: uploadData.filename,
-                    mimetype: uploadData.mimetype,
-                    size: uploadData.size,
-                    title: uploadTitle || null,
-                    description: uploadDesc || null,
-                    docType: uploadType,
-                }),
+                body: fd,
             });
             const docData = await docRes.json();
             if (!docRes.ok) throw new Error(docData.error || '建立文件紀錄失敗');

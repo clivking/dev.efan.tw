@@ -1,23 +1,26 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
+import { getCompanyInfo } from '@/lib/company';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { getLocationEntity, getLocationFaqEntities } from '@/lib/content-entities';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { buildBreadcrumbSchema, buildFaqSchema } from '@/lib/structured-data';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await getRequestSiteContext();
+  const [site, company] = await Promise.all([getRequestSiteContext(), getCompanyInfo()]);
   const location = getLocationEntity('taipei-access-control');
 
   return buildContentMetadata({
     site,
     pathname: location?.href || '/locations/taipei-access-control',
-    title: `${location?.name || '台北市門禁系統'}規劃、安裝與升級指南 | 一帆科技`,
+    title: `${location?.name || '台北市門禁系統'}規劃、安裝與升級指南｜${company.name}`,
     description:
       '台北市門禁系統如何規劃？整理商辦、診所、補教與社區入口常見的門禁安裝、權限管理、對講整合與升級重點，適合採購前先做需求盤點。',
-    siteName: '一帆科技',
+    siteName: company.name,
     type: 'website',
   });
 }
@@ -27,10 +30,10 @@ export default async function TaipeiAccessControlPage() {
   const location = getLocationEntity('taipei-access-control');
   const faqItems = getLocationFaqEntities('taipei-access-control');
   const faqSchema = buildFaqSchema(faqItems);
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: '服務地區', item: `${site.origin}/locations` },
-    { name: location?.name || '台北市門禁系統', item: `${site.origin}${location?.href || '/locations/taipei-access-control'}` },
-  ]);
+  const breadcrumbs = withHomeBreadcrumb('服務地區', location?.name || '台北市門禁系統');
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    toBreadcrumbSchemaItems(breadcrumbs, site.origin, location?.href || '/locations/taipei-access-control'),
+  );
 
   const guideLinks = [
     { href: '/guides/2026-enterprise-access-control-guide', label: '企業門禁系統完整指南' },
@@ -48,6 +51,7 @@ export default async function TaipeiAccessControlPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(96,165,250,0.18),transparent_24%)]" />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_460px] lg:items-center">
           <div>
+            <BreadcrumbTrail items={breadcrumbs} tone="dark" />
             <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.22em] text-amber-200">
               TAIPEI ACCESS CONTROL
             </div>

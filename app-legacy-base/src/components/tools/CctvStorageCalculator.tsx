@@ -7,6 +7,7 @@ import CctvCapacityForm, { type CalculatorFormState } from '@/components/tools/C
 import CctvCapacityResults from '@/components/tools/CctvCapacityResults';
 import { calculateRequiredStorage, calculateRetentionDays } from '@/lib/cctv-capacity';
 import { DEFAULT_SAFETY_MARGIN } from '@/lib/cctv-capacity-presets';
+import { shouldBypassImageOptimization } from '@/lib/image-paths';
 import {
     CCTV_CALCULATOR_FAQ_ITEMS,
     CCTV_CAMERA_GUIDE_ROWS,
@@ -55,7 +56,7 @@ const RECOMMENDED_NVRS = [
         description: '適合通道數較多、需要集中管理的大型案場。',
         href: '/products/acti-znr-424',
         cta: '看主機產品',
-        image: '/api/uploads/products/ACTi_ZNR-424.png',
+        image: '/api/uploads/products/ZNR-424/images/ZNR-424_01_front.png',
         alt: 'ACTi 64路機架式 NVR 主機',
     },
     {
@@ -63,7 +64,7 @@ const RECOMMENDED_NVRS = [
         description: '適合中大型監控點位，兼顧擴充與管理效率。',
         href: '/products/acti-znr-423',
         cta: '看主機產品',
-        image: '/api/uploads/products/ACTi_ZNR-423.png',
+        image: '/api/uploads/products/ZNR-423-ZNR-425/images/ZNR-423-ZNR-425_01_front.png',
         alt: 'ACTi 32路機架式 NVR 主機',
     },
     {
@@ -71,7 +72,7 @@ const RECOMMENDED_NVRS = [
         description: '中小型辦公室與店面常見的實用型配置。',
         href: '/products/acti-znr-222p',
         cta: '看主機產品',
-        image: '/api/uploads/products/ACTi_ZNR-222P.png',
+        image: '/api/uploads/products/ZNR-222P/images/ZNR-222P_01_front.png',
         alt: 'ACTi 16路桌面型 NVR 主機',
     },
 ];
@@ -82,7 +83,7 @@ const RECOMMENDED_CAMERAS = [
         description: '4MP(2K) 畫質，適合店面、辦公室與室內公共區域。',
         href: '/products/acti-z72',
         cta: '看鏡頭產品',
-        image: '/api/uploads/products/ACTi_Z72.png',
+        image: '/api/uploads/products/Z72-Z79/images/Z72-Z79_01_front.png',
         alt: 'ACTi 4MP AI 海螺型攝影機',
     },
     {
@@ -90,7 +91,7 @@ const RECOMMENDED_CAMERAS = [
         description: '夜間辨識更穩，適合出入口與較複雜光線場景。',
         href: '/products/acti-z722',
         cta: '看鏡頭產品',
-        image: '/api/uploads/products/ACTi_Z722.png',
+        image: '/api/uploads/products/Z722-Z511/images/Z722-Z511_01_front.png',
         alt: 'ACTi 4MP AI 雙光源海螺型攝影機',
     },
     {
@@ -98,7 +99,7 @@ const RECOMMENDED_CAMERAS = [
         description: '需要更高畫質與夜間表現時，很常被拿來升級配置。',
         href: '/products/acti-z53',
         cta: '看鏡頭產品',
-        image: '/api/uploads/products/ACTi_Z53.png',
+        image: '/api/uploads/products/Z53-Z512/images/Z53-Z512_01_front.png',
         alt: 'ACTi 5MP AI 雙光源海螺型攝影機',
     },
 ];
@@ -122,7 +123,7 @@ function ProductSection({
                 {products.map((product) => (
                     <article key={product.title} className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[#fcfbf8] shadow-sm">
                         <div className="relative aspect-[16/10] bg-white">
-                            <Image src={product.image} alt={product.alt} fill sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" className="object-contain p-6" />
+                            <Image src={product.image} alt={product.alt} fill sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" unoptimized={shouldBypassImageOptimization(product.image)} className="object-contain p-6" />
                         </div>
                         <div className="p-5">
                             <h4 className="text-lg font-black text-slate-950">{product.title}</h4>
@@ -187,68 +188,60 @@ export default function CctvStorageCalculator() {
     return (
         <div className="bg-[#f5f1e8] text-slate-950">
             <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-                <div className="space-y-8">
-                    <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-                        <div className="mb-6">
-                            <div className="text-sm font-bold tracking-[0.18em] text-slate-400">STEP 1</div>
-                            <h2 className="mt-2 text-2xl font-black text-slate-950">先選你現在最想知道什麼</h2>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <button
-                                type="button"
-                                onClick={() => setMode('storage')}
-                                className={`rounded-[1.75rem] border p-6 text-left transition ${mode === 'storage' ? 'border-[#1e3a8a] bg-[#1e3a8a] text-white shadow-lg shadow-blue-900/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
-                            >
-                                <div className={`text-sm font-bold tracking-[0.18em] ${mode === 'storage' ? 'text-sky-100' : 'text-slate-400'}`}>MODE A</div>
-                                <div className={`mt-2 text-2xl font-black ${mode === 'storage' ? 'text-white' : 'text-slate-950'}`}>計算多少容量</div>
-                                <p className={`mt-3 text-sm leading-7 ${mode === 'storage' ? 'text-slate-100' : 'text-slate-600'}`}>適合還在規劃案場或準備採購的人，先抓出硬碟容量會比較有方向。</p>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setMode('retention')}
-                                className={`rounded-[1.75rem] border p-6 text-left transition ${mode === 'retention' ? 'border-[#1e3a8a] bg-[#1e3a8a] text-white shadow-lg shadow-blue-900/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
-                            >
-                                <div className={`text-sm font-bold tracking-[0.18em] ${mode === 'retention' ? 'text-sky-100' : 'text-slate-400'}`}>MODE B</div>
-                                <div className={`mt-2 text-2xl font-black ${mode === 'retention' ? 'text-white' : 'text-slate-950'}`}>反推可以錄幾天</div>
-                                <p className={`mt-3 text-sm leading-7 ${mode === 'retention' ? 'text-slate-100' : 'text-slate-600'}`}>適合手上已有硬碟或 NVR 的人，先看目前配置大概能撐多久。</p>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-                        <div className="mb-8">
-                            <div className="text-sm font-bold tracking-[0.18em] text-slate-400">STEP 2</div>
-                            <h2 className="mt-2 text-2xl font-black text-slate-950">再輸入你的案場條件</h2>
-                        </div>
-                        <CctvCapacityForm mode={mode} value={formState} onChange={setFormState} />
-                    </div>
-
-                    <div className="space-y-6">
+                <div className="rounded-[2.25rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                    <div className="space-y-8">
                         <div>
-                            <div className="mb-4 text-sm font-bold tracking-[0.18em] text-slate-400">STEP 3</div>
-                            <h2 className="text-2xl font-black text-slate-950">看結果，抓採購方向</h2>
+                            <div className="text-sm font-bold tracking-[0.18em] text-slate-400">1. 選模式</div>
+                            <div className="mt-4 grid gap-4 md:grid-cols-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setMode('storage')}
+                                    className={`rounded-[1.75rem] border p-6 text-left transition ${mode === 'storage' ? 'border-[#1e3a8a] bg-[#1e3a8a] text-white shadow-lg shadow-blue-900/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
+                                >
+                                    <div className={`text-sm font-bold tracking-[0.18em] ${mode === 'storage' ? 'text-sky-100' : 'text-slate-400'}`}>容量</div>
+                                    <div className={`mt-2 text-2xl font-black ${mode === 'storage' ? 'text-white' : 'text-slate-950'}`}>算需要多大硬碟</div>
+                                    <p className={`mt-3 text-sm leading-7 ${mode === 'storage' ? 'text-slate-100' : 'text-slate-600'}`}>適合準備規劃或採購。</p>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setMode('retention')}
+                                    className={`rounded-[1.75rem] border p-6 text-left transition ${mode === 'retention' ? 'border-[#1e3a8a] bg-[#1e3a8a] text-white shadow-lg shadow-blue-900/20' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
+                                >
+                                    <div className={`text-sm font-bold tracking-[0.18em] ${mode === 'retention' ? 'text-sky-100' : 'text-slate-400'}`}>天數</div>
+                                    <div className={`mt-2 text-2xl font-black ${mode === 'retention' ? 'text-white' : 'text-slate-950'}`}>算現在能錄幾天</div>
+                                    <p className={`mt-3 text-sm leading-7 ${mode === 'retention' ? 'text-slate-100' : 'text-slate-600'}`}>適合手上已有硬碟或 NVR。</p>
+                                </button>
+                            </div>
                         </div>
-                        <CctvCapacityResults
-                            mode={mode}
-                            result={currentResult}
-                            safetyMarginPercent={safetyMarginPercent}
-                            driveCapacityTb={formState.driveCapacityTb}
-                        />
 
-                        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-                            <div className="text-sm font-bold tracking-[0.18em] text-slate-400">NEXT STEP</div>
-                            <h3 className="mt-2 text-2xl font-black text-slate-950">要不要順手把主機與鏡頭一起配好？</h3>
-                            <p className="mt-3 text-sm leading-7 text-slate-500">
-                                容量抓得出來，只是第一步。若你希望一次把鏡頭規格、錄影主機通道數、硬碟顆數與後續擴充一起盤好，我們可以直接協助你規劃。
-                            </p>
-                            <div className="mt-6 flex flex-wrap gap-3">
-                                <Link href="/quote-request" className="rounded-full bg-[#1d4ed8] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#1e40af]">
-                                    免費請工程師協助估算
-                                </Link>
-                                <Link href="/services/cctv" className="rounded-full border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">
-                                    了解監視系統規劃
-                                </Link>
+                        <div>
+                            <div className="mb-4 text-sm font-bold tracking-[0.18em] text-slate-400">2. 填條件</div>
+                            <CctvCapacityForm mode={mode} value={formState} onChange={setFormState} />
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="text-sm font-bold tracking-[0.18em] text-slate-400">3. 看結果</div>
+                            <CctvCapacityResults
+                                mode={mode}
+                                result={currentResult}
+                                safetyMarginPercent={safetyMarginPercent}
+                                driveCapacityTb={formState.driveCapacityTb}
+                            />
+
+                            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                <div className="text-sm font-bold tracking-[0.18em] text-slate-400">下一步</div>
+                                <h3 className="mt-2 text-2xl font-black text-slate-950">要不要順手把主機與鏡頭一起配好？</h3>
+                                <p className="mt-3 text-sm leading-7 text-slate-500">
+                                    如果你想連主機、鏡頭和硬碟一起配，我們可以直接協助你規劃。
+                                </p>
+                                <div className="mt-6 flex flex-wrap gap-3">
+                                    <Link href="/quote-request" className="rounded-full bg-[#1d4ed8] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#1e40af]">
+                                        免費請工程師協助估算
+                                    </Link>
+                                    <Link href="/services/cctv" className="rounded-full border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">
+                                        了解監視系統規劃
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -336,7 +329,7 @@ export default function CctvStorageCalculator() {
             </section>
 
             <section className="mx-auto max-w-6xl px-4 py-14">
-                <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                <div className="space-y-8">
                     <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
                         <div className="text-sm font-bold tracking-[0.18em] text-slate-400">FAQ</div>
                         <h2 className="mt-2 text-2xl font-black text-slate-950">監視器硬碟容量常見問題</h2>

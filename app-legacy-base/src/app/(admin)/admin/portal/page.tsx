@@ -356,7 +356,7 @@ export default function PortalAdminPage() {
                                 return (
                                     <div key={v.id} className="flex items-center gap-4 p-4 hover:bg-gray-50">
                                         <span className="text-xs text-gray-400 w-6 text-center">{v.sortOrder}</span>
-                                        {thumb && <Image src={thumb} alt="" width={96} height={56} sizes="96px" className="w-24 h-14 object-cover rounded" />}
+                                        {thumb && <Image src={thumb} alt="" width={96} height={56} sizes="96px" unoptimized={thumb.startsWith('/api/')} className="w-24 h-14 object-cover rounded" />}
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium text-sm truncate">{v.title}</div>
                                             <div className="text-xs text-gray-400 flex gap-2 mt-0.5">
@@ -406,6 +406,7 @@ export default function PortalAdminPage() {
                                                             alt="軟體圖片"
                                                             fill
                                                             sizes="80px"
+                                                            unoptimized
                                                             className="object-cover rounded-lg border"
                                                         />
                                                     </div>
