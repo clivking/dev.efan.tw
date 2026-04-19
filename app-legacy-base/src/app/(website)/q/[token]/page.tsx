@@ -62,6 +62,10 @@ export default async function QuotePage({ params }: { params: Promise<{ token: s
     const data = await getQuoteData(token);
 
     if (data.error) {
+        if (data.error === 'not_found') {
+            notFound();
+        }
+
         const dummyCompany = {
             name: '一帆安全整合有限公司',
             phone: '02-7730-1158',
