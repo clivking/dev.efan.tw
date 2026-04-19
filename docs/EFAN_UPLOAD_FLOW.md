@@ -117,6 +117,13 @@ This backup must complete successfully before:
 - any selective `www -> dev` sync
 - any `pre -> www` promotion
 
+Current practical notes:
+
+- current `www` uploads live in the Docker volume `nextjs_nextjs_uploads`, not in a normal host uploads directory
+- current `www` runtime depends on the remote file `/Users/cliv/efan_server/nextjs/docker-compose.yml`
+- that remote `docker-compose.yml` is runtime state and must not be deleted by a source sync from this repo
+- the repo-level `compose.yaml` in `/Users/cliv/efan_server/nextjs` is not the production release entrypoint for Step 5
+
 Current script entrypoint:
 
 ```bash
@@ -216,6 +223,8 @@ This step promotes the current validated release candidate to `pre`.
 `pre` runs on Mac mini, so the long-term safe default is:
 
 - rebuild on the Mac host from the promoted source commit
+- if Step 3 ran in the current release flow, create or use a `dev` backup made after Step 3 completed and use that post-Step-3 snapshot as the Step 4 handoff source
+- do not reuse an earlier same-day `dev` backup from before Step 3 for the `pre` DB or uploads refresh when customer or quote data changed
 
 Do not assume a Linux build artifact from `dev` should be copied directly to `pre`.
 
@@ -253,6 +262,11 @@ EFAN_PRE_BASE_URL=https://pre.efan.tw \
 ./scripts/deploy-to-pre.sh
 ```
 
+Current practical warning:
+
+- if `pre` is refreshed from `dev` data, the backup package used for the `pre` DB and uploads refresh must be newer than the latest Step 3 selective sync; otherwise `pre` can be rebuilt with stale customer or quote records even when code deploy succeeds
+- current `pre` source sync should target the remote build-context tree and must not assume the runtime compose directory contains the full source tree
+
 Only after `pre` passes should the release move to `www`.
 
 ## Step 5: Pre To Www Release Promotion
@@ -269,6 +283,28 @@ The production-safe target is:
 
 - promote code and release-approved content changes
 - preserve `www` as the source of truth for live customer and quote records
+
+### Step 5 Runtime Rule
+
+Current `www` promotion is a production web-image refresh, not a `pre` DB restore.
+
+That means:
+
+- rebuild the intended release on the Mac host for the production web image
+- restart the production web container against the existing production DB and uploads volume
+- do not replace `www` DB data with `pre` or `dev` DB data during a normal Step 5
+- do not replace `www` uploads with `pre` or `dev` uploads during a normal Step 5
+
+### Step 5 Source-Sync Rule
+
+Current practical source-sync safety requirements:
+
+- exclude remote scratch paths such as `temp_web`
+- preserve the runtime compose file `/Users/cliv/efan_server/nextjs/docker-compose.yml`
+- do not let a repo sync remove that file and fall back to the repo's own `compose.yaml`
+- verify the compose service names from the runtime compose file before restarting production services
+
+If the runtime compose file is removed or bypassed, `docker compose` can accidentally target the wrong stack definition and try to create development-style containers on the production host.
 
 ### Step 5 Validation
 
@@ -297,6 +333,10 @@ EFAN_WWW_COMPOSE_FILE=compose.www.yaml \
 EFAN_WWW_BASE_URL=https://www.efan.tw \
 ./scripts/deploy-to-www.sh
 ```
+
+Current practical warning:
+
+- the generic release wrapper in this repo does not by itself guarantee the current `www` runtime compose behavior on the Mac mini; validate the remote compose file, service names, and source-sync excludes before treating Step 5 as complete
 
 ## Rollback Rule
 

@@ -19,6 +19,18 @@ Current release-flow helpers:
 - `check-customer-quote-sync-dependencies.sql`: SQL checks used by the dependency validator
 - `customer-quote-sync-primary-tables.txt`: canonical primary table scope for Step 3 selective sync
 
+## Current Deployment Caveats
+
+These helpers describe the intended long-term direction, but the current Mac mini runtime still has environment-specific behavior that operators must respect.
+
+- current `pre` is split between a remote build-context tree and a separate runtime compose directory
+- current `www` relies on the remote runtime file `/Users/cliv/efan_server/nextjs/docker-compose.yml`
+- do not assume the repo-level `compose.yaml` in the remote `www` source tree is the production release entrypoint
+- do not let a source sync delete the remote `docker-compose.yml` for `www`
+- exclude scratch paths such as `temp_web` when syncing the current `www` source tree
+- verify the actual compose service names from the remote runtime compose file before restarting `pre` or `www`
+- if Step 3 was executed in the same run, create a new `dev` backup after Step 3 and use that post-Step-3 backup for any Step 4 `pre` DB or uploads refresh
+
 ## Uploads mount check
 
 Use this after rebuilding `efan-dev-web` when image or product assets unexpectedly

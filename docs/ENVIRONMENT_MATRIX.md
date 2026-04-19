@@ -30,6 +30,36 @@ All three environments should converge on the same model:
 | Data source | refreshed down from `www` when needed | refreshed down from `www` before validation | source of truth |
 | Uploads | local working copy uploads | dedicated pre uploads | production uploads |
 
+## Current Runtime Paths
+
+These are the currently observed remote paths that matter operationally:
+
+- `pre` build context root: `/Users/cliv/efan_server/build_context_pre`
+- `pre` source tree used for build: `/Users/cliv/efan_server/build_context_pre/dev.efan.tw`
+- `pre` runtime compose dir: `/Users/cliv/efan_server/pre`
+- `pre` runtime compose file: `/Users/cliv/efan_server/pre/docker-compose.yml`
+- `www` runtime source dir: `/Users/cliv/efan_server/nextjs`
+- `www` runtime compose file: `/Users/cliv/efan_server/nextjs/docker-compose.yml`
+
+## Current Compose Reality
+
+The current repo contains compose files that are not interchangeable with the live Mac runtime files.
+
+- local `dev` uses repo-managed compose files such as `compose.work-prod.yaml`
+- current `pre` uses a split model: synced source in the remote build-context tree, but runtime compose in `/Users/cliv/efan_server/pre`
+- current `www` relies on the remote runtime file `/Users/cliv/efan_server/nextjs/docker-compose.yml`
+- the repo-level `compose.yaml` inside the remote `www` source tree is not the intended Step 5 production entrypoint
+
+## Operational Guardrails
+
+For stable releases, treat these as mandatory:
+
+1. Step 4 `dev -> pre` data refresh must use a `dev` backup created after the latest Step 3 selective sync if Step 3 changed customer or quote data.
+2. Step 5 `pre -> www` should rebuild and restart the production web stack while preserving the existing production DB and uploads volume.
+3. A source sync to current `www` must exclude scratch paths such as `temp_web`.
+4. A source sync to current `www` must not delete `/Users/cliv/efan_server/nextjs/docker-compose.yml`.
+5. Before restarting production services, verify the actual service names from the runtime compose file rather than assuming the service names from repo-local compose files.
+
 ## Required Runtime Variables
 
 These are the currently observed app-level env keys:
