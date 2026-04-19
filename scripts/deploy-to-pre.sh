@@ -5,8 +5,9 @@ usage() {
   cat <<'EOF'
 Usage:
   EFAN_PRE_HOST=user@host \
-  EFAN_PRE_PATH=/path/to/pre/repo \
+  EFAN_PRE_PATH=/path/to/pre/build-context \
   EFAN_PRE_COMPOSE_FILE=compose.pre.yaml \
+  [EFAN_PRE_RUNTIME_PATH=/path/to/pre/runtime] \
   [EFAN_PRE_BASE_URL=https://pre.efan.tw] \
   [EFAN_PRE_SOURCE_REF=HEAD] \
   ./scripts/deploy-to-pre.sh [--allow-dirty]
@@ -27,6 +28,10 @@ cmd=(
   --compose-file "${EFAN_PRE_COMPOSE_FILE}"
   --source-ref "${EFAN_PRE_SOURCE_REF:-HEAD}"
 )
+
+if [[ -n "${EFAN_PRE_RUNTIME_PATH:-}" ]]; then
+  cmd+=(--runtime-path "${EFAN_PRE_RUNTIME_PATH}")
+fi
 
 if [[ -n "${EFAN_PRE_BASE_URL:-}" ]]; then
   cmd+=(--base-url "${EFAN_PRE_BASE_URL}")

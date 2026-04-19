@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import JsonLdScript from '@/components/common/JsonLdScript';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import { getCompanyInfo } from '@/lib/company';
+import { buildContentMetadata } from '@/lib/content-metadata';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { buildBreadcrumbSchema, buildCollectionPageSchema } from '@/lib/structured-data';
 import { getRequestSiteContext } from '@/lib/site-url';
 
@@ -12,35 +16,37 @@ const TOOLS = [
         name: '監視器容量計算器',
         description: '快速估算 CCTV / NVR 需要多少硬碟容量，或反推現有硬碟大約能保存幾天。',
     },
+    {
+        href: '/tools/cctv-focal-length-calculator',
+        name: '監視器焦距計算器',
+        description: '快速判斷 CCTV 該選幾 mm 鏡頭、可拍多寬，以及 2.8mm、4mm、6mm、8mm 的常見差異。',
+    },
+    {
+        href: '/tools/access-control-quick-consultation',
+        name: '門禁快速諮詢',
+        description: '輸入場域、門數、訪客與管理需求，快速判斷門禁該走哪種架構、開門方式與後續規劃重點。',
+    },
 ];
 
 export async function generateMetadata(): Promise<Metadata> {
-    const site = await getRequestSiteContext();
-    const canonical = `${site.origin}/tools`;
-    const title = '實用工具 | 一帆安全整合有限公司';
-    const description = '集中整理監視系統、弱電與安防規劃常用的公開工具，協助你在正式詢價前先做初步試算。';
+    const [site, company] = await Promise.all([getRequestSiteContext(), getCompanyInfo()]);
+    const title = `安防規劃實用工具：門禁、監視與容量試算｜${company.name}`;
+    const description = '整理門禁、監視系統與弱電規劃常用工具，協助你在正式詢價前先試算容量、焦距、門數與需求方向。';
 
-    return {
-        title: { absolute: title },
+    return buildContentMetadata({
+        site,
+        pathname: '/tools',
+        title,
         description,
-        alternates: { canonical },
-        openGraph: {
-            title,
-            description,
-            url: canonical,
-            type: 'website',
-            locale: 'zh_TW',
-            siteName: '一帆安全整合有限公司',
-        },
-    };
+        siteName: company.name,
+        type: 'website',
+    });
 }
 
 export default async function ToolsPage() {
     const site = await getRequestSiteContext();
-    const breadcrumbSchema = buildBreadcrumbSchema([
-        { name: '首頁', item: site.origin },
-        { name: '實用工具', item: `${site.origin}/tools` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb('實用工具');
+    const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, '/tools'));
     const collectionSchema = buildCollectionPageSchema({
         url: `${site.origin}/tools`,
         name: '一帆實用工具',
@@ -62,6 +68,7 @@ export default async function ToolsPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.16),transparent_26%)]" />
                 <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
                     <div className="max-w-4xl">
+                        <BreadcrumbTrail items={breadcrumbs} tone="dark" />
                         <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.24em] text-amber-200">
                             EFAN TOOLS
                         </div>

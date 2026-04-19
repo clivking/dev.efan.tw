@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import JsonLdScript from '@/components/common/JsonLdScript';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -54,8 +58,22 @@ export default function LoginPage() {
         }
     }
 
+    const breadcrumbs = withHomeBreadcrumb('系統登入');
+    const breadcrumbSchema = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(
+            breadcrumbs,
+            typeof window !== 'undefined' ? window.location.origin : '',
+            '/login',
+        ),
+    );
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center p-4">
+            <JsonLdScript data={breadcrumbSchema} />
+            <div className="w-full max-w-sm">
+                <div className="mb-6">
+                    <BreadcrumbTrail items={breadcrumbs} tone="light" />
+                </div>
             <div className="bg-white max-w-sm w-full rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-8 pb-6">
                     <div className="flex justify-center mb-6">
@@ -134,6 +152,7 @@ export default function LoginPage() {
                 <div className="bg-slate-50 border-t border-slate-100 p-4 text-center">
                     <p className="text-xs text-slate-400">&copy; 2026 一帆報價系統. All rights reserved.</p>
                 </div>
+            </div>
             </div>
         </div>
     );

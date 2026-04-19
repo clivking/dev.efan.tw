@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { getCompanyInfo } from '@/lib/company';
 import { getSetting, getSettings } from '@/lib/settings';
 import { SERVICE_NAMES, TIER_NAMES } from '@/lib/types/consultation-types';
 import { getConfiguredSiteOrigin } from '@/lib/site-url';
@@ -41,6 +42,11 @@ async function getTransporter(): Promise<nodemailer.Transporter | null> {
         console.error('[Email] Failed to create transporter:', err);
         return null;
     }
+}
+
+async function getCompanyServiceLine() {
+    const company = await getCompanyInfo();
+    return `超過 ${company.yearsInBusiness} 年專業安防整合服務`;
 }
 
 export async function sendEmail(
@@ -143,6 +149,7 @@ export async function sendQuoteRequestCustomerConfirmation(data: QuoteRequestEma
 
     const enabled = await getSetting('email_notify_enabled', true);
     if (!enabled) return;
+    const companyServiceLine = await getCompanyServiceLine();
 
     const serviceNames = data.services.map(s => SERVICE_NAMES[s] || s).join('、');
     const tierNames = data.budgetTiers.map(t => TIER_NAMES[t] || t).join('、');
@@ -151,7 +158,7 @@ export async function sendQuoteRequestCustomerConfirmation(data: QuoteRequestEma
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="text-align: center; padding: 20px 0;">
     <h1 style="color: #1a4b8c; margin: 0;">一帆安全整合</h1>
-    <p style="color: #999; margin: 4px 0 0;">超過 40 年專業安防整合服務</p>
+    <p style="color: #999; margin: 4px 0 0;">${companyServiceLine}</p>
   </div>
 
   <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin: 16px 0;">
@@ -176,7 +183,7 @@ export async function sendQuoteRequestCustomerConfirmation(data: QuoteRequestEma
 
   <hr style="border: none; border-top: 1px solid #eee;" />
   <p style="color: #999; font-size: 12px; text-align: center; line-height: 1.6;">
-    一帆安全整合有限公司<br/>超過 40 年專業安防整合服務
+    一帆安全整合有限公司<br/>${companyServiceLine}
   </p>
 </div>`;
 
@@ -257,6 +264,7 @@ export async function sendInquiryCustomerConfirmation(data: InquiryEmailData): P
 
     const enabled = await getSetting('email_notify_enabled', true);
     if (!enabled) return;
+    const companyServiceLine = await getCompanyServiceLine();
 
     const productList = data.products.map((p, i) =>
         `<tr><td style="padding: 6px 12px; border-bottom: 1px solid #f0f0f0;">${i + 1}.</td><td style="padding: 6px 12px; border-bottom: 1px solid #f0f0f0;">${p.name}</td><td style="padding: 6px 12px; border-bottom: 1px solid #f0f0f0; text-align: center;">× ${p.quantity}</td></tr>`
@@ -266,7 +274,7 @@ export async function sendInquiryCustomerConfirmation(data: InquiryEmailData): P
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="text-align: center; padding: 20px 0;">
     <h1 style="color: #1a4b8c; margin: 0;">一帆安全整合</h1>
-    <p style="color: #999; margin: 4px 0 0;">超過 40 年專業安防整合服務</p>
+    <p style="color: #999; margin: 4px 0 0;">${companyServiceLine}</p>
   </div>
 
   <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin: 16px 0;">
@@ -289,7 +297,7 @@ export async function sendInquiryCustomerConfirmation(data: InquiryEmailData): P
 
   <hr style="border: none; border-top: 1px solid #eee;" />
   <p style="color: #999; font-size: 12px; text-align: center; line-height: 1.6;">
-    一帆安全整合有限公司<br/>超過 40 年專業安防整合服務
+    一帆安全整合有限公司<br/>${companyServiceLine}
   </p>
 </div>`;
 
@@ -313,6 +321,7 @@ export async function sendConsultationConfirmation(data: ConsultationEmailData):
 
     const enabled = await getSetting('email_notify_enabled', true);
     if (!enabled) return;
+    const companyServiceLine = await getCompanyServiceLine();
 
     const serviceNames = data.services.map(s => SERVICE_NAMES[s] || s).join('、');
     const tierNames = data.budgetTiers.map(t => TIER_NAMES[t] || t).join('、');
@@ -324,7 +333,7 @@ export async function sendConsultationConfirmation(data: ConsultationEmailData):
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="text-align: center; padding: 20px 0;">
     <h1 style="color: #1a4b8c; margin: 0;">一帆安全整合</h1>
-    <p style="color: #999; margin: 4px 0 0;">超過 40 年專業安防整合服務</p>
+    <p style="color: #999; margin: 4px 0 0;">${companyServiceLine}</p>
   </div>
 
   <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin: 16px 0;">
@@ -348,7 +357,7 @@ export async function sendConsultationConfirmation(data: ConsultationEmailData):
 
   <hr style="border: none; border-top: 1px solid #eee;" />
   <p style="color: #999; font-size: 12px; text-align: center; line-height: 1.6;">
-    一帆安全整合有限公司<br/>超過 40 年專業安防整合服務
+    一帆安全整合有限公司<br/>${companyServiceLine}
   </p>
 </div>`;
 

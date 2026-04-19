@@ -172,6 +172,21 @@ export function buildInternalNoteSummary(data: {
         if (ac.doorTypes?.length) lines.push(`門型：${ac.doorTypes.map((t: string) => DOOR_TYPE_LABELS[t] || t).join('、')}`);
         if (ac.extras?.length) lines.push(`其他：${ac.extras.map((e: string) => ACCESS_FEATURE_LABELS[e] || e).join('、')}`);
         if (ac.plans?.length) lines.push(`方案偏好：${ac.plans.join('、')}`);
+        if (ac.quickConsultation) {
+            const qc = ac.quickConsultation;
+            lines.push(`快速諮詢版本：${qc.version}`);
+            lines.push(`場域：${qc.scenario}`);
+            lines.push(`使用對象：${qc.userFlow}`);
+            lines.push(`訪客需求：${qc.visitorFlow}`);
+            lines.push(`開門偏好：${qc.methods.join('、')}`);
+            lines.push(`專案類型：${qc.projectStage}`);
+            lines.push(`遠端管理：${qc.remoteManagement ? '需要' : '暫時不需要'}`);
+            lines.push(`考勤整合：${qc.attendanceIntegration ? '希望保留' : '目前不以考勤為主'}`);
+            lines.push(`系統建議：${qc.architecture}`);
+            lines.push(`開門方向：${qc.openingRecommendation}`);
+            if (qc.keyPoints?.length) lines.push(`規劃提醒：${qc.keyPoints.join(' | ')}`);
+            if (qc.risks?.length) lines.push(`注意事項：${qc.risks.join(' | ')}`);
+        }
         lines.push('');
     }
     if (d.cctv) {

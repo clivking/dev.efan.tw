@@ -47,10 +47,14 @@ export async function generateDeliveryPdf(quote: any, baseUrl = getConfiguredSit
         displayItems = quote.items;
     }
 
-    // Remove hidden items if setting is true
-    if (removeHiddenItems) {
-        displayItems = displayItems.filter((item: any) => !item.isHiddenItem);
-    }
+    // 出貨單只顯示實際需要出貨的項目：
+    // 1. 眼睛遮住的隱藏項目不顯示
+    // 2. 0 元或 0 數量的選購項目不顯示
+    displayItems = displayItems.filter((item: any) => {
+        if (removeHiddenItems && item.isHiddenItem) return false;
+        if (Number(item.quantity || 0) <= 0) return false;
+        return Number(item.subtotal || 0) > 0;
+    });
 
     // Bundle Expansion Logic
     const finalItems: any[] = [];

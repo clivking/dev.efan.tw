@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import { withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { QuoteRequestData, ServiceType, INITIAL_DATA } from './lib/quote-request-types';
 import ProgressBar from './components/ProgressBar';
 import StepServices from './components/StepServices';
@@ -187,8 +189,11 @@ export default function QuoteRequestClient() {
 
     if (submitted) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center px-4">
+            <div className="min-h-[60vh] flex items-center justify-center px-4 py-12">
                 <div className="w-full max-w-lg">
+                    <div className="mb-6 flex justify-center">
+                        <BreadcrumbTrail items={withHomeBreadcrumb('快速報價')} tone="light" />
+                    </div>
                     <ThankYou quoteNumber={quoteNumber} />
                 </div>
             </div>
@@ -198,6 +203,9 @@ export default function QuoteRequestClient() {
     return (
         <div className="min-h-[60vh] flex items-center justify-center px-4 py-12">
             <div className="w-full max-w-2xl">
+                <div className="mb-6 flex justify-center">
+                    <BreadcrumbTrail items={withHomeBreadcrumb('快速報價')} tone="light" />
+                </div>
                 <ProgressBar current={currentIdx + 1} total={totalSteps} />
 
                 {/* Step content with animation */}

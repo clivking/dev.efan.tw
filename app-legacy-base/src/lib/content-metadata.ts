@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 export const SEO_DESCRIPTION_SOFT_LIMIT = 160;
+export const DEFAULT_OG_IMAGE_PATH = '/images/hero.webp';
 
 export type SharedContentMetadata = {
   excerpt?: string;
@@ -73,7 +74,7 @@ export function buildContentMetadata({
   const resolvedDescription = cleanMetadataValue(description);
   const canonical = buildCanonicalUrl(site, pathname);
   const resolvedSiteName = cleanMetadataValue(siteName);
-  const resolvedOgImage = cleanMetadataValue(ogImage);
+  const resolvedOgImage = cleanMetadataValue(ogImage) || DEFAULT_OG_IMAGE_PATH;
   const robots = site.isIndexable
     ? undefined
     : {

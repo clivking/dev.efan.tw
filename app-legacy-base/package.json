@@ -19,6 +19,8 @@
     "lint": "eslint .",
     "script:check-db": "tsx scripts/check-db.ts",
     "script:check-uploads": "node scripts/check-uploads-integrity.mjs",
+    "script:audit-canonical-uploads": "node scripts/audit-canonical-uploads.mjs",
+    "script:migrate-canonical-product-assets": "node scripts/migrate-canonical-product-assets.mjs",
     "script:fix-uploads-drift": "node scripts/fix-uploads-extension-drift.mjs",
     "script:fix-uploads-docs": "node scripts/fix-uploads-document-mappings.mjs",
     "script:test-prisma": "node scripts/test-prisma.mjs",

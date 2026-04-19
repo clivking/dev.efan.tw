@@ -34,15 +34,15 @@ export default function HeroSection({ company }: { company: CompanyInfo }) {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[4rem] font-black mb-6 leading-[1.15] tracking-tight relative z-20">
-              <span className="block mb-2 drop-shadow-xl">企業安全整合，不只安裝</span>
+              <span className="block mb-2 drop-shadow-xl">台北門禁系統、監視錄影、電話總機整合</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-efan-accent to-amber-300 drop-shadow-sm">
-                更要穩定、好管、可持續維運
+                規劃施工更要穩定、好管、可持續維運
               </span>
             </h1>
 
             <p className="text-[17px] sm:text-xl text-gray-300 mb-10 leading-relaxed font-medium max-w-2xl bg-white/5 p-4 rounded-r-xl border-l-4 border-efan-accent md:backdrop-blur-sm relative z-20">
-              {company.tagline}
-              {' '}我們提供門禁系統、監視錄影、電話總機與弱電整合規劃，從現場評估、設備選型到施工交付與後續維護，幫企業把安全與管理一次做好。
+              我們提供大台北企業與商用空間的門禁系統、監視錄影、電話總機與弱電整合規劃，
+              從現場評估、設備選型到施工交付與後續維護，協助你把安全、管理與日常營運一次整理到位。
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5">

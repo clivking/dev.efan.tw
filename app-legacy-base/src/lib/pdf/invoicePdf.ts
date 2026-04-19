@@ -55,6 +55,10 @@ export async function generateInvoicePdf(quote: any, baseUrl = getConfiguredSite
         displayItems = quote.items;
     }
 
+    // 請款單只顯示實際有請款金額且未被隱藏的品項。
+    displayItems = displayItems.filter((item: any) => !item.isHiddenItem && Number(item.subtotal || 0) > 0);
+
+
     const discount = Number(quote.discountAmount);
     const transport = Number(quote.transportFee || 0);
     const taxRate = Number(quote.taxRate);

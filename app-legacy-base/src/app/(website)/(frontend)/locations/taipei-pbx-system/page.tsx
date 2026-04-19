@@ -1,23 +1,26 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
+import { getCompanyInfo } from '@/lib/company';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { getLocationEntity, getLocationFaqEntities } from '@/lib/content-entities';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { buildBreadcrumbSchema, buildFaqSchema } from '@/lib/structured-data';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await getRequestSiteContext();
+  const [site, company] = await Promise.all([getRequestSiteContext(), getCompanyInfo()]);
   const location = getLocationEntity('taipei-pbx-system');
 
   return buildContentMetadata({
     site,
     pathname: location?.href || '/locations/taipei-pbx-system',
-    title: `${location?.name || '台北電話總機系統'}規劃、汰換與升級指南 | 一帆科技`,
+    title: `${location?.name || '台北電話總機系統'}規劃、汰換與升級指南｜${company.name}`,
     description:
       '台北電話總機系統怎麼規劃？整理企業分機架構、IP PBX、門口機整合、多據點與遠端辦公常見情境，適合更新前先做需求盤點。',
-    siteName: '一帆科技',
+    siteName: company.name,
     type: 'website',
   });
 }
@@ -27,10 +30,10 @@ export default async function TaipeiPBXSystemPage() {
   const location = getLocationEntity('taipei-pbx-system');
   const faqItems = getLocationFaqEntities('taipei-pbx-system');
   const faqSchema = buildFaqSchema(faqItems);
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: '服務地區', item: `${site.origin}/locations` },
-    { name: location?.name || '台北電話總機系統', item: `${site.origin}${location?.href || '/locations/taipei-pbx-system'}` },
-  ]);
+  const breadcrumbs = withHomeBreadcrumb('服務地區', location?.name || '台北電話總機系統');
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    toBreadcrumbSchemaItems(breadcrumbs, site.origin, location?.href || '/locations/taipei-pbx-system'),
+  );
 
   const guideLinks = [
     { href: '/guides/telecom-architecture-pbx-evaluation', label: '企業電話總機完整指南' },
@@ -46,6 +49,7 @@ export default async function TaipeiPBXSystemPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(250,204,21,0.12),transparent_24%)]" />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_460px] lg:items-center">
           <div>
+            <BreadcrumbTrail items={breadcrumbs} tone="dark" />
             <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.22em] text-emerald-200">
               TAIPEI PBX SYSTEM
             </div>

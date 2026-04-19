@@ -7,6 +7,7 @@ import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPage } from '@/lib/page-content';
 import { getRequestSiteContext } from '@/lib/site-url';
 import PageBanner from '@/components/common/PageBanner';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { buildBreadcrumbSchema, buildFaqSchema, buildServiceSchema } from '@/lib/structured-data';
 
 export const revalidate = 3600;
@@ -22,6 +23,7 @@ type ServiceReading = { title: string; href: string; description: string };
 
 type ServiceContent = {
     name: string;
+    pageHeading: string;
     title: string;
     description: string;
     longDesc: string[];
@@ -41,9 +43,10 @@ const SERVICE_SLUGS = ['access-control', 'cctv', 'phone-system', 'attendance', '
 const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = {
     'access-control': {
         name: '門禁系統',
-        title: '門禁系統規劃與安裝 | 一帆安全整合有限公司',
+        pageHeading: '台北門禁系統規劃與安裝',
+        title: '台北門禁系統規劃、安裝與整合｜一帆安全整合有限公司',
         description:
-            '提供辦公室、診所、社區與商用空間的門禁系統規劃，協助整合刷卡、密碼、人臉、訪客流程與遠端管理需求。',
+            '台北門禁系統規劃安裝，支援刷卡、指紋、人臉辨識、手機開門。42年實務經驗，從現場評估、權限設計到施工交付，一站式服務。適用辦公室、工廠、共享空間，協助企業做好出入口管理。',
         longDesc: [
             '門禁系統的重點不只是開門方式，而是整體出入口管理流程是否順暢。從門片條件、鎖具型式、使用人員到訪客動線，每個環節都會影響最終的使用體驗。',
             '很多企業會先問哪一台讀卡機或控制器比較便宜，但真正拉開差距的，通常是權限設計、施工細節、停電與消防聯動邏輯，以及未來是否還要再補第二道門、訪客流程或遠端管理。',
@@ -71,6 +74,7 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
             '沒有為第二道門、遠端管理或監視聯動留下擴充空間，之後一加需求就得重做。',
         ],
         relatedReading: [
+            { title: '門禁快速諮詢', href: '/tools/access-control-quick-consultation', description: '先回答幾題，快速判斷門數、訪客、遠端管理與系統方向，再決定要不要送出施工資料。' },
             { title: '企業門禁系統完整指南', href: '/guides/2026-enterprise-access-control-guide', description: '先看整體架構、權限設計與整合方向，再決定設備與預算。' },
             { title: '門禁 TCO 採購分析', href: '/guides/2026-access-control-tco-analysis', description: '整理門禁系統最容易忽略的隱藏成本與整體擁有成本。' },
             { title: '台北門禁系統規劃', href: '/locations/taipei-access-control', description: '從台北商辦條件出發，看門型、樓管限制與在地施工情境。' },
@@ -87,9 +91,10 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
     },
     cctv: {
         name: '監視系統',
-        title: '監視系統規劃與安裝 | 一帆安全整合有限公司',
+        pageHeading: '台北監視系統規劃與安裝',
+        title: '台北監視系統規劃、安裝與錄影整合｜一帆安全整合有限公司',
         description:
-            '提供商辦、店面、工廠與社區空間的監視系統規劃，協助整合攝影機、錄影主機、遠端查看與影像保存需求。',
+            '大台北監視系統規劃，400萬至800萬像素攝影機、AI人形車牌偵測、手機遠端監看、NVR與雲端雙備份。從鏡頭數量、錄影保存天數到後續維運，幫你一次整理到位。',
         longDesc: [
             '監視系統的規劃重點不在於鏡頭數量，而是能否真正覆蓋重要畫面、看得清楚、查得到紀錄。',
             '從畫面範圍、夜間環境、錄影保存天數到遠端查看方式，一開始就規劃完整，會比後續零碎補裝更穩定。',
@@ -104,10 +109,12 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
         process: ['確認要看的位置與目的', '規劃鏡頭、錄影主機與保存天數', '安排配線與安裝', '完成測試、教學與交付'],
         relatedReading: [
             { title: '監視器容量計算器', href: '/tools/cctv-storage-calculator', description: '先試算攝影機數量、畫質、FPS 與保存天數需要多少硬碟容量，再比較 NVR 與硬碟配置。' },
+            { title: '監視器焦距計算器', href: '/tools/cctv-focal-length-calculator', description: '先抓門口、櫃台、走道或車道口大概要用幾 mm 鏡頭，再回頭確認畫面範圍與焦段。' },
             { title: '台北監視系統解決方案', href: '/solutions/taipei-cctv-system', description: '如果你要看的是台北辦公室、店面或社區案場的整體規劃方式，這頁會更貼近實務情境。' },
         ],
         faq: [
             { q: '監視系統需要幾支攝影機才夠？', a: '要看出入口數量、畫面範圍與管理重點，通常會先確認哪些位置一定要看得到，再決定鏡頭數量與焦段。' },
+            { q: '監視器幾 mm 怎麼選？', a: '通常會先看安裝距離和想拍多寬，再回推鏡頭焦距。若你還在抓 2.8mm、4mm、6mm 或 8mm，可以先用我們的監視器焦距計算器試算。' },
             { q: '錄影紀錄可以保存多久？', a: '保存時間與畫質、通道數、硬碟容量有關，規劃時可以依場域需求調整。' },
             { q: '可以用手機查看監視畫面嗎？', a: '可以，多數架構都可搭配手機或電腦遠端查看，但仍需一起評估網路與權限設定。' },
             { q: '錄影硬碟容量要怎麼估？', a: '通常會先看攝影機數量、解析度、FPS、壓縮格式與保存天數，再估算硬碟容量。我們也提供監視器容量計算器，讓你先快速試算。' },
@@ -117,9 +124,10 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
     },
     'phone-system': {
         name: '總機系統',
-        title: '總機系統規劃與更新 | 一帆安全整合有限公司',
+        pageHeading: '台北電話總機與 IP PBX 規劃',
+        title: '台北電話總機與 IP PBX 規劃更新｜一帆安全整合有限公司',
         description:
-            '協助企業評估總機、IP PBX、分機與通話流程，整理更適合現場營運的電話與通訊系統架構。',
+            '數位/IP電話總機規劃安裝，支援分機互通、外線配置、電話錄音、行動分機。適合20人以上企業辦公室或工廠，彈性擴充不浪費。我們同時整合門禁與監視，一個窗口搞定所有通訊需求。',
         longDesc: [
             '總機系統不只是電話設備，而是企業對外接待、部門分流與日常通訊的重要基礎。',
             '若現有分機混亂、設備老舊或想升級到 IP PBX，建議先盤點實際通話流程與整合需求，再決定升級方式。',
@@ -142,9 +150,10 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
     },
     attendance: {
         name: '考勤系統',
-        title: '考勤系統規劃與整合 | 一帆安全整合有限公司',
+        pageHeading: '台北考勤系統與打卡整合規劃',
+        title: '台北考勤系統規劃與門禁整合｜一帆安全整合有限公司',
         description:
-            '協助企業評估考勤設備、打卡流程與門禁串接方式，建立更容易管理的人員出勤紀錄機制。',
+            '門禁考勤整合系統，刷卡、指紋或人臉辨識自動記載出勤資料，直接對接薪資計算。支援台北企業既有系統對接，省去人工整理Excel的麻煩。還能依部門或班別設定不同出勤規則。',
         longDesc: [
             '考勤系統要好用，關鍵在於打卡方式是否貼近現場工作流程，以及資料是否能被後續管理作業實際使用。',
             '若場域同時有門禁或多班別需求，建議一開始就把打卡、權限與報表需求一起整理，避免系統彼此切開。',
@@ -167,9 +176,10 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
     },
     integration: {
         name: '弱電整合',
-        title: '弱電整合與系統規劃 | 一帆安全整合有限公司',
+        pageHeading: '台北弱電整合與系統規劃',
+        title: '台北弱電整合、配線與安防系統規劃｜一帆安全整合有限公司',
         description:
-            '針對辦公室、商用空間與多系統場域，協助規劃弱電配線、網路、門禁、監視與對講等整合方向。',
+            '弱電系統整合規劃，專營門禁、監視、網路佈線、機櫃整理與系統聯網。42年整合經驗，從新案規劃到舊系統更新，一次統整減少跨廠商協調成本。台北企業優先服務。',
         longDesc: [
             '弱電整合的價值在於把原本分散的系統與設備整理成更穩定、可維護的架構，而不是各自獨立、彼此難以配合。',
             '若現場同時有網路、門禁、監視、總機或對講需求，越早規劃整合方向，後續施工與維運越容易掌握。',
@@ -300,6 +310,7 @@ function getSectionData(page: any, fallback: ServiceContent) {
 
     return {
         name: getString(sections.hero?.name, fallback.name),
+        pageHeading: getString(sections.hero?.title, fallback.pageHeading),
         title: getString(page?.seoTitle, fallback.title),
         description: getString(sections.hero?.description || page?.seoDescription, fallback.description),
         longDesc: getStringArray(sections.longDesc, fallback.longDesc),
@@ -316,6 +327,21 @@ function getSectionData(page: any, fallback: ServiceContent) {
     };
 }
 
+function pickServiceMetadataDescription(page: any, data: ReturnType<typeof getSectionData>) {
+    const candidates = [
+        typeof page?.seoDescription === 'string' ? page.seoDescription.trim() : '',
+        typeof page?.excerpt === 'string' ? page.excerpt.trim() : '',
+        data.description,
+    ].filter(Boolean);
+
+    if (candidates.length > 0) {
+        return candidates[0];
+    }
+
+    const expandedFallback = `${data.description} ${data.longDesc[0] || ''}`.trim();
+    return expandedFallback || data.description;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
     const fallback = getServiceContent(slug);
@@ -325,15 +351,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const [page, company, site] = await Promise.all([getPage(`service-${slug}`), getCompanyInfo(), getRequestSiteContext()]);
     const data = getSectionData(page, fallback);
+    const metadataDescription = pickServiceMetadataDescription(page, data);
 
     return buildContentMetadata({
         site,
         pathname: `/services/${slug}`,
         title: data.title,
-        description: data.description,
+        description: metadataDescription,
         siteName: company.name,
         type: 'website',
-        ogImage: page?.ogImage || undefined,
+        ogImage: page?.ogImage || '/images/hero.webp',
     });
 }
 
@@ -346,21 +373,19 @@ export default async function ServicePage({ params }: Props) {
 
     const [page, company, site] = await Promise.all([getPage(`service-${slug}`), getCompanyInfo(), getRequestSiteContext()]);
     const data = getSectionData(page, fallback);
+    const metadataDescription = pickServiceMetadataDescription(page, data);
 
     const serviceSchema = buildServiceSchema({
         url: `${site.origin}/services/${slug}`,
         name: data.name,
-        description: data.description,
+        description: metadataDescription,
         organizationId: `${site.origin}/#organization`,
         areaServed: 'Taipei, Taiwan',
         serviceType: data.name,
     });
 
-    const breadcrumbSchema = buildBreadcrumbSchema([
-        { name: '首頁', item: site.origin },
-        { name: '服務項目', item: `${site.origin}/#services` },
-        { name: data.name, item: `${site.origin}/services/${slug}` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb({ label: '服務項目', href: '/#services' }, data.name);
+    const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, `/services/${slug}`));
 
     const faqSchema = buildFaqSchema(
         data.faq.map((item) => ({
@@ -376,12 +401,9 @@ export default async function ServicePage({ params }: Props) {
             <JsonLdScript data={faqSchema} />
 
             <PageBanner
-                title={data.name}
+                title={data.pageHeading}
                 subtitle={data.description}
-                breadcrumbs={[
-                    { label: '服務項目', href: '/#services' },
-                    { label: data.name },
-                ]}
+                breadcrumbs={breadcrumbs}
             />
 
             <section className="relative overflow-hidden bg-white py-24">

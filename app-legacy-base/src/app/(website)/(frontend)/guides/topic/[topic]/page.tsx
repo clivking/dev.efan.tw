@@ -1,9 +1,15 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import JsonLdScript from '@/components/common/JsonLdScript';
+import { getCompanyInfo } from '@/lib/company';
+import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPublishedGuides } from '@/lib/guide-content';
 import { GUIDE_CONTENT_TYPE_LABELS } from '@/lib/guide-schema';
 import { getGuideTopicConfig, getGuideTopicKey } from '@/lib/guide-topics';
 import { getRequestSiteContext } from '@/lib/site-url';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 type Props = {
   params: Promise<{ topic: string }>;
@@ -22,44 +28,37 @@ function getFallbackTopicConfig(topic: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { topic } = await params;
-  const site = await getRequestSiteContext();
+  const [site, company] = await Promise.all([getRequestSiteContext(), getCompanyInfo()]);
   const config = getGuideTopicConfig(topic) || getFallbackTopicConfig(topic);
 
-  const title = `${config.label}指南 | 一帆科技`;
-  const description = `整理 ${config.label} 的採購重點、規劃流程、比較文與 FAQ。`;
+  const title = `${config.label}指南與採購重點整理｜${company.name}`;
+  const description = `整理 ${config.label} 的採購重點、規劃流程、比較文與 FAQ，協助企業在導入或升級前快速收斂方向。`;
 
-  return {
-    title: { absolute: title },
+  return buildContentMetadata({
+    site,
+    pathname: `/guides/topic/${config.key}`,
+    title,
     description,
-    alternates: { canonical: `${site.origin}/guides/topic/${config.key}` },
-    openGraph: {
-      title,
-      description,
-      url: `${site.origin}/guides/topic/${config.key}`,
-      type: 'website',
-      locale: 'zh_TW',
-      siteName: '一帆科技',
-    },
-  };
+    siteName: company.name,
+    type: 'website',
+  });
 }
 
 export default async function GuideTopicPage({ params }: Props) {
   const { topic } = await params;
+  const site = await getRequestSiteContext();
   const config = getGuideTopicConfig(topic) || getFallbackTopicConfig(topic);
   const guides = (await getPublishedGuides()).filter((guide) => getGuideTopicKey(guide.topic) === config.key);
   const featuredGuide = guides[0] || null;
+  const breadcrumbs = withHomeBreadcrumb({ label: '知識指南', href: '/guides' }, config.label);
+  const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, `/guides/topic/${config.key}`));
 
   return (
     <div className="bg-[#f4f1ea] text-slate-900">
+      <JsonLdScript data={breadcrumbSchema} />
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16">
-          <nav className="text-sm text-slate-500">
-            <Link href="/guides" className="hover:text-slate-900">
-              知識指南
-            </Link>
-            <span className="mx-2 text-slate-300">/</span>
-            <span className="text-slate-700">{config.label}</span>
-          </nav>
+          <BreadcrumbTrail items={breadcrumbs} tone="light" />
 
           <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
             <div>

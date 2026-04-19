@@ -9,6 +9,7 @@ import ContactForm from './ContactForm';
 import ServerStatusBadge from '@/components/common/ServerStatusBadge';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { buildBreadcrumbSchema } from '@/lib/structured-data';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 
 export const revalidate = 3600;
 
@@ -49,10 +50,8 @@ export default async function ContactPage() {
 
     const site = await getRequestSiteContext();
     const baseUrl = site.origin;
-    const breadcrumbLd = buildBreadcrumbSchema([
-        { name: '首頁', item: baseUrl },
-        { name: '聯絡我們', item: `${baseUrl}/contact` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb('聯絡我們');
+    const breadcrumbLd = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, baseUrl, '/contact'));
 
     return (
         <div className="flex flex-col w-full bg-slate-50 min-h-screen relative overflow-hidden">
@@ -62,7 +61,7 @@ export default async function ContactPage() {
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-teal-900/10 via-emerald-900/5 to-transparent rounded-full blur-[100px] -z-10 translate-x-1/3 -translate-y-1/3"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-blue-900/10 via-indigo-900/5 to-transparent rounded-full blur-[100px] -z-10 -translate-x-1/3 translate-y-1/3"></div>
 
-            <PageBanner title={heroTitle} subtitle={heroSubtitle} />
+            <PageBanner title={heroTitle} subtitle={heroSubtitle} breadcrumbs={breadcrumbs} />
 
             <section className="py-24 relative z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -8,11 +8,28 @@ export type BudgetTier = 'basic' | 'standard' | 'advanced' | 'ai_smart';
 
 // ─── Service Detail Interfaces ──────────────────────────────────
 
+export interface AccessControlQuickConsultationMeta {
+    version: 'v1';
+    scenario: string;
+    userFlow: string;
+    visitorFlow: string;
+    methods: string[];
+    projectStage: string;
+    remoteManagement: boolean;
+    attendanceIntegration: boolean;
+    architecture: string;
+    openingRecommendation: string;
+    keyPoints: string[];
+    risks: string[];
+    aiSummary: string[];
+}
+
 export interface AccessControlDetails {
     doorCount: number;
     doorTypes: string[];
     extras: string[];
     plans: string[];   // 經濟型 / 標準型 / 進階型 / AI指紋 / AI人臉
+    quickConsultation?: AccessControlQuickConsultationMeta;
 }
 
 export interface CCTVDetails {

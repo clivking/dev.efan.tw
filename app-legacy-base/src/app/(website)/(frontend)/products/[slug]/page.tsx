@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Image from 'next/image';
 import sanitizeHtml from 'sanitize-html';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
 import ProductBadges from '@/components/products/ProductBadges';
 import ProductTabs from '@/components/products/ProductTabs';
 import { getCompanyInfo } from '@/lib/company';
 import { buildContentMetadata } from '@/lib/content-metadata';
+import { toBreadcrumbSchemaItems } from '@/lib/breadcrumbs';
 import { PRODUCT_PAGE_COPY } from '@/lib/product-page-copy';
 import { prisma } from '@/lib/prisma';
 import { getProductMainImage, getProductMainImages, stripHtml } from '@/lib/product-helpers';
@@ -545,14 +547,15 @@ export default async function ProductDetailPage({ params }: Props) {
             .filter(Boolean) as Array<{ question: string; answer: string }>,
     );
 
-    const breadcrumbJsonLd = buildBreadcrumbSchema([
-        { name: PRODUCT_PAGE_COPY.breadcrumbHome, item: site.origin },
-        { name: PRODUCT_PAGE_COPY.breadcrumbProducts, item: `${site.origin}/products` },
-        ...(product.category
-            ? [{ name: product.category.name, item: `${site.origin}/products/category/${categorySlug}` }]
-            : []),
-        { name: product.name, item: `${site.origin}/products/${product.seoSlug}` },
-    ]);
+    const breadcrumbs = [
+        { label: PRODUCT_PAGE_COPY.breadcrumbHome, href: '/' },
+        { label: PRODUCT_PAGE_COPY.breadcrumbProducts, href: '/products' },
+        ...(product.category ? [{ label: product.category.name, href: `/products/category/${categorySlug}` }] : []),
+        { label: product.model || product.name },
+    ];
+    const breadcrumbJsonLd = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(breadcrumbs, site.origin, `/products/${product.seoSlug}`),
+    );
 
     const tabs: Array<{ key: string; label: string; content: ReactNode }> = [];
 
@@ -839,25 +842,11 @@ export default async function ProductDetailPage({ params }: Props) {
                 <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid items-stretch gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
                         <div className="order-1 flex min-h-full flex-col justify-start">
-    <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-white/72">
-        <Link href="/" className="transition-colors hover:text-white">
-            {PRODUCT_PAGE_COPY.breadcrumbHome}
-        </Link>
-        <span>/</span>
-        <Link href="/products" className="transition-colors hover:text-white">
-            {PRODUCT_PAGE_COPY.breadcrumbProducts}
-        </Link>
-        {product.category ? (
-            <>
-                <span>/</span>
-                <Link href={`/products/category/${categorySlug}`} className="transition-colors hover:text-white">
-                    {product.category.name}
-                </Link>
-                <span>/</span>
-                <span className="text-white">{product.model || product.name}</span>
-            </>
-        ) : null}
-    </nav>
+    <BreadcrumbTrail
+        items={breadcrumbs}
+        tone="dark"
+        className="mb-6"
+    />
 
     <div className="relative w-full">
         <ProductImageGallery

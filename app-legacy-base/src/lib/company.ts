@@ -22,6 +22,14 @@ export interface CompanyInfo {
 }
 
 const FOUNDED_YEAR = 1984;
+const CURRENT_YEARS_IN_BUSINESS = new Date().getFullYear() - FOUNDED_YEAR;
+
+export function syncYearsInMarketingCopy(value: string, years = CURRENT_YEARS_IN_BUSINESS) {
+    return value
+        .replace(/超過\s*40\s*年/g, `超過 ${years} 年`)
+        .replace(/40\s*年/g, `${years}年`)
+        .replace(/40\s+年/g, `${years} 年`);
+}
 
 const FALLBACK: CompanyInfo = {
     name: '一帆安全整合有限公司',
@@ -29,11 +37,11 @@ const FALLBACK: CompanyInfo = {
     phone: '02-7730-1158',
     email: 'pro@efan.tw',
     address: '台北市大安區四維路14巷15號7樓之1',
-    tagline: '40年專業門禁×監視×總機整合｜超過2,600家企業信賴',
+    tagline: `${CURRENT_YEARS_IN_BUSINESS}年專業門禁×監視×總機整合｜超過2,600家企業信賴`,
     logoUrl: '/images/logo.png',
     taxId: '',
     foundedYear: FOUNDED_YEAR,
-    yearsInBusiness: new Date().getFullYear() - FOUNDED_YEAR,
+    yearsInBusiness: CURRENT_YEARS_IN_BUSINESS,
     clientCount: 2600,
     googleRating: 5.0,
     googleReviews: 18,
@@ -61,11 +69,11 @@ const getCachedCompanyInfo = unstable_cache(
                 phone: settings['company_phone'] || FALLBACK.phone,
                 email: settings['company_email'] || FALLBACK.email,
                 address: settings['company_address'] || FALLBACK.address,
-                tagline: settings['company_description'] || FALLBACK.tagline,
+                tagline: syncYearsInMarketingCopy(settings['company_description'] || FALLBACK.tagline),
                 logoUrl: settings['company_logo_url'] || FALLBACK.logoUrl,
                 taxId: settings['tax_id'] || FALLBACK.taxId,
                 foundedYear: FOUNDED_YEAR,
-                yearsInBusiness: new Date().getFullYear() - FOUNDED_YEAR,
+                yearsInBusiness: CURRENT_YEARS_IN_BUSINESS,
                 clientCount: Number(settings['completed_case_count'] || FALLBACK.clientCount),
                 googleRating: Number(settings['google_rating'] || FALLBACK.googleRating),
                 googleReviews: Number(settings['google_reviews'] || FALLBACK.googleReviews),

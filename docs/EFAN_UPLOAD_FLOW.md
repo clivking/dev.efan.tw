@@ -246,8 +246,9 @@ Current deploy entrypoint:
 
 ```bash
 EFAN_PRE_HOST=user@mac-mini \
-EFAN_PRE_PATH=/srv/efan/pre \
-EFAN_PRE_COMPOSE_FILE=compose.pre.yaml \
+EFAN_PRE_PATH=/srv/efan/pre-build-context \
+EFAN_PRE_RUNTIME_PATH=/srv/efan/pre \
+EFAN_PRE_COMPOSE_FILE=/srv/efan/pre/docker-compose.yml \
 EFAN_PRE_BASE_URL=https://pre.efan.tw \
 ./scripts/deploy-to-pre.sh
 ```

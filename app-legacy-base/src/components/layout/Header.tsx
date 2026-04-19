@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Calculator,
   Clock,
@@ -15,6 +16,7 @@ import {
   Phone,
   PlayCircle,
   Plug,
+  Search,
   Send,
   Video,
 } from 'lucide-react';
@@ -55,6 +57,8 @@ const GUIDE_LINKS: ResourceLink[] = [
 
 const SUPPORT_LINKS: ResourceLink[] = [
   { href: '/tools/cctv-storage-calculator', label: '監視器容量計算', note: '試算錄影所需硬碟容量與保存天數。' },
+  { href: '/tools/cctv-focal-length-calculator', label: '監視器焦距計算', note: '試算幾 mm 鏡頭較適合、可拍多寬。' },
+  { href: '/tools/access-control-quick-consultation', label: '門禁快速諮詢', note: '先判斷門數、訪客與管理需求，再決定要不要送出施工資料。' },
   { href: '/support/downloads', label: '軟體下載', note: '門禁、監視與相關驅動下載。' },
   { href: '/portal', label: '教學專區', note: '成交客戶專屬教學與操作影片。' },
 ];
@@ -74,18 +78,36 @@ function NavUnderline({ active }: { active: boolean }) {
 }
 
 export default function Header({ company: companyProp, categories = [] }: HeaderProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const company = companyProp;
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const productsTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setIsProductsOpen(false);
     setIsServicesOpen(false);
     setIsResourcesOpen(false);
+    setIsSearchOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [isSearchOpen]);
 
   const handleProductsEnter = () => {
     if (productsTimerRef.current) clearTimeout(productsTimerRef.current);
@@ -99,18 +121,29 @@ export default function Header({ company: companyProp, categories = [] }: Header
   const shortName = company ? getShortCompanyName(company.name) : '一帆';
   const servicesActive = pathname?.startsWith('/services') || pathname?.startsWith('/solutions');
   const productsActive = pathname?.startsWith('/products');
-  const resourcesActive = pathname?.startsWith('/guides') || pathname?.startsWith('/support') || pathname?.startsWith('/portal');
+  const resourcesActive =
+    pathname?.startsWith('/guides') ||
+    pathname?.startsWith('/support') ||
+    pathname?.startsWith('/portal') ||
+    pathname?.startsWith('/tools');
   const aboutActive = pathname === '/about' || pathname === '/about/clients' || pathname === '/contact';
 
   if (!company) {
     return (
       <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4 md:h-20">
-          <span className="text-xl font-bold text-efan-primary">一帆科技</span>
+          <span className="text-xl font-bold text-efan-primary">一帆安全整合</span>
         </div>
       </header>
     );
   }
+
+  const submitSearch = (event?: FormEvent) => {
+    event?.preventDefault();
+    const keyword = searchQuery.trim();
+    router.push(keyword ? `/search?q=${encodeURIComponent(keyword)}` : '/search');
+    setIsSearchOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white">
@@ -276,7 +309,7 @@ export default function Header({ company: companyProp, categories = [] }: Header
                           <li key={item.href}>
                             <Link href={item.href} className="flex items-start gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-gray-50">
                               <div className="rounded-lg bg-efan-primary/10 p-2">
-                                {item.href === '/tools/cctv-storage-calculator' ? <Calculator className="h-4 w-4 text-efan-primary" /> : item.href === '/support/downloads' ? <Download className="h-4 w-4 text-efan-primary" /> : <PlayCircle className="h-4 w-4 text-efan-primary" />}
+                                {item.href.startsWith('/tools/') ? <Calculator className="h-4 w-4 text-efan-primary" /> : item.href === '/support/downloads' ? <Download className="h-4 w-4 text-efan-primary" /> : <PlayCircle className="h-4 w-4 text-efan-primary" />}
                               </div>
                               <div>
                                 <div className="text-sm font-bold text-gray-800">
@@ -316,7 +349,33 @@ export default function Header({ company: companyProp, categories = [] }: Header
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden items-center md:flex">
+          <div className="hidden items-center gap-3 md:flex">
+            <div className="relative" ref={searchRef}>
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen((prev) => !prev)}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 transition hover:border-slate-300 hover:bg-white hover:text-slate-900"
+                aria-label="全站搜尋"
+              >
+                <Search className="h-4 w-4" strokeWidth={2} />
+              </button>
+              {isSearchOpen && (
+                <form
+                  onSubmit={submitSearch}
+                  className="absolute left-1/2 top-full z-40 mt-3 flex w-[280px] -translate-x-1/2 items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.32)]"
+                >
+                  <Search className="h-4 w-4 text-slate-400" strokeWidth={2} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="搜尋產品、服務、指南"
+                    className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                    autoFocus
+                  />
+                </form>
+              )}
+            </div>
             <Link href="/quote-request" className="rounded-full bg-efan-accent px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-efan-accent/20 transition-all hover:bg-efan-accent-dark active:scale-95">
               快速報價
             </Link>

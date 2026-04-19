@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import { Metadata } from 'next';
 import JsonLdScript from '@/components/common/JsonLdScript';
-import { getCompanyInfo } from '@/lib/company';
+import { getCompanyInfo, syncYearsInMarketingCopy } from '@/lib/company';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPage } from '@/lib/page-content';
 import { getRequestSiteContext } from '@/lib/site-url';
@@ -45,14 +45,26 @@ const ClientLogos = dynamic(() => import('@/components/home/ClientLogos'), {
 
 export async function generateMetadata(): Promise<Metadata> {
   const [page, company, site] = await Promise.all([getPage('home'), getCompanyInfo(), getRequestSiteContext()]);
+  const preferredTitle = `${company.name}｜台北門禁系統、監視、總機與弱電專業整合 ${company.yearsInBusiness} 年`;
+  const normalizedPageTitle = syncYearsInMarketingCopy(page?.seoTitle || '');
+  const usesLegacyHomeTitle =
+    !normalizedPageTitle ||
+    /專業門禁[×、].*監視.*總機整合/.test(normalizedPageTitle) ||
+    /台北門禁系統、監視、總機與弱電整合/.test(normalizedPageTitle);
+  const title = usesLegacyHomeTitle ? preferredTitle : normalizedPageTitle;
+  const description = syncYearsInMarketingCopy(
+    page?.seoDescription ||
+      page?.excerpt ||
+      `${company.yearsInBusiness}年專業門禁、監視錄影、電話總機與弱電整合服務，超過${company.clientCount.toLocaleString()}家企業信賴，大台北地區提供現場評估與規劃施工。`
+  );
 
   return buildContentMetadata({
     site,
     pathname: '/',
-    title: page?.seoTitle || `${company.name} | ${company.tagline}`,
-    description: page?.seoDescription || page?.excerpt || company.tagline,
+    title,
+    description,
     siteName: company.name,
-    ogImage: page?.ogImage,
+    ogImage: page?.ogImage || '/images/hero.webp',
     type: 'website',
   });
 }

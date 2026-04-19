@@ -1,6 +1,10 @@
 import { Metadata } from 'next';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import JsonLdScript from '@/components/common/JsonLdScript';
 import { getCompanyInfo } from '@/lib/company';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { getRequestSiteContext } from '@/lib/site-url';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +32,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TermsOfServicePage() {
-  const company = await getCompanyInfo();
+  const [company, site] = await Promise.all([getCompanyInfo(), getRequestSiteContext()]);
+  const breadcrumbs = withHomeBreadcrumb('服務條款');
+  const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, '/terms'));
 
   return (
     <div className="bg-gray-50 min-h-screen py-16 md:py-24">
+      <JsonLdScript data={breadcrumbSchema} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <BreadcrumbTrail items={breadcrumbs} tone="light" />
+        </div>
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
           <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-12 text-center text-white">
             <h1 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">服務條款</h1>

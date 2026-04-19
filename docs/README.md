@@ -18,6 +18,7 @@ These are the documents that should guide ongoing operations:
 - `EFAN_UPLOAD_FLOW.md`
 - `CUSTOMER_QUOTE_SYNC_SCOPE.md`
 - `UPLOADS_GOVERNANCE.md`
+- `UPLOADS_CANONICAL_ASSET_PLAN.md`
 - `WORKING_COPY_STATUS.md`
 - `WORKING_COPY_CLEANUP.md`
 - `SCRIPTS_GOVERNANCE.md`

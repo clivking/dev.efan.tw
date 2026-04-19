@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import JsonLdScript from '@/components/common/JsonLdScript';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 
 interface VideoDetail {
     id: string;
@@ -23,6 +27,16 @@ export default function PortalVideoPage() {
     const [video, setVideo] = useState<VideoDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const breadcrumbs = withHomeBreadcrumb({ label: '教學專區', href: '/portal' }, '影片內容');
+    const currentPath = typeof id === 'string' ? `/portal/videos/${id}` : '/portal/videos';
+    const breadcrumbSchema = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(
+            breadcrumbs,
+            typeof window !== 'undefined' ? window.location.origin : '',
+            currentPath,
+        ),
+    );
 
     useEffect(() => {
         const fetchVideo = async () => {
@@ -48,21 +62,31 @@ export default function PortalVideoPage() {
 
     if (loading) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+            <div className="min-h-[60vh] px-4 py-10">
+                <JsonLdScript data={breadcrumbSchema} />
+                <div className="mx-auto max-w-5xl">
+                    <BreadcrumbTrail items={breadcrumbs} tone="light" className="mb-6" />
+                    <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                    </div>
+                </div>
             </div>
         );
     }
 
     if (error || !video) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="min-h-[60vh] px-4 py-10">
+                <JsonLdScript data={breadcrumbSchema} />
+                <div className="mx-auto max-w-5xl">
+                    <BreadcrumbTrail items={breadcrumbs} tone="light" className="mb-6" />
                 <div className="text-center">
                     <div className="text-5xl mb-4">❌</div>
                     <p className="text-gray-600 font-medium">{error || '影片不存在'}</p>
                     <Link href="/portal" className="text-blue-600 hover:underline text-sm mt-4 inline-block">
                         ← 回到影片列表
                     </Link>
+                </div>
                 </div>
             </div>
         );
@@ -72,6 +96,8 @@ export default function PortalVideoPage() {
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-10">
+            <JsonLdScript data={breadcrumbSchema} />
+            <BreadcrumbTrail items={breadcrumbs} tone="light" className="mb-6" />
             <Link href="/portal" className="text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6 inline-block">
                 ← 回到影片列表
             </Link>

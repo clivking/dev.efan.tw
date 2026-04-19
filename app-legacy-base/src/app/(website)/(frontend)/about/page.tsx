@@ -2,12 +2,13 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import JsonLdScript from '@/components/common/JsonLdScript';
-import { getCompanyInfo } from '@/lib/company';
+import { getCompanyInfo, syncYearsInMarketingCopy } from '@/lib/company';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getPage } from '@/lib/page-content';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { NOTABLE_CLIENTS } from '@/lib/constants';
 import { buildAboutPageSchema, buildBreadcrumbSchema } from '@/lib/structured-data';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import PageBanner from '@/components/common/PageBanner';
 import ClientLogos from '@/components/home/ClientLogos';
 
@@ -17,15 +18,18 @@ export async function generateMetadata(): Promise<Metadata> {
     const page = await getPage('about');
     const company = await getCompanyInfo();
     const site = await getRequestSiteContext();
+    const title = syncYearsInMarketingCopy(page?.seoTitle || `關於一帆｜${company.yearsInBusiness}年安防整合專業｜${company.name}`);
+    const description = syncYearsInMarketingCopy(
+        page?.seoDescription ||
+            page?.excerpt ||
+            `${company.name} 自民國 73 年起深耕安防產業，累積 ${company.yearsInBusiness} 年經驗，服務超過 ${company.clientCount} 家企業與場域。`
+    );
 
     return buildContentMetadata({
         site,
         pathname: '/about',
-        title: page?.seoTitle || `關於一帆｜${company.yearsInBusiness}年安防整合專業｜${company.name}`,
-        description:
-            page?.seoDescription ||
-            page?.excerpt ||
-            `${company.name} 自民國 73 年起深耕安防產業，累積 ${company.yearsInBusiness} 年經驗，服務超過 ${company.clientCount} 家企業與場域。`,
+        title,
+        description,
         siteName: company.name,
         ogImage: page?.ogImage,
         type: 'article',
@@ -63,10 +67,8 @@ export default async function AboutPage() {
         organizationId: `${baseUrl}/#organization`,
     });
 
-    const breadcrumbSchema = buildBreadcrumbSchema([
-        { name: '首頁', item: baseUrl },
-        { name: '關於我們', item: `${baseUrl}/about` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb('關於一帆');
+    const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, baseUrl, '/about'));
 
     // ==================== Main structured layout ====================
     const REASONS = [
@@ -114,6 +116,7 @@ export default async function AboutPage() {
             <PageBanner
                 title="關於一帆安全整合"
                 subtitle="做工程，我們知道客戶要的從來不只是價格，而是專業負責的規劃、細心嚴謹的施工，以及長期穩定的專人維護。"
+                breadcrumbs={breadcrumbs}
             />
 
             {/* ===== 2. 信任數字 ===== */}
@@ -346,7 +349,7 @@ export default async function AboutPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 animate-in fade-in zoom-in-95 duration-1000">
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 tracking-tight drop-shadow-md">您的企業級系統基礎，<br className="hidden md:block"/>可以放心交給<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">一帆團隊。</span></h2>
                     <p className="text-slate-300 mb-12 text-xl max-w-3xl mx-auto leading-relaxed font-medium">
-                        不論你是新辦公室落成、企業廠區整改、還是面臨舊機故障風險，交給 40 年實績認證的工程團隊。我們會為您評估最穩健、最一勞永逸的企業級數位對策。
+                        不論你是新辦公室落成、企業廠區整改、還是面臨舊機故障風險，交給 {company.yearsInBusiness} 年實績認證的工程團隊。我們會為您評估最穩健、最一勞永逸的企業級數位對策。
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">

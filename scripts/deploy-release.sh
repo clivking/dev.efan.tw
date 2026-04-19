@@ -7,15 +7,16 @@ Usage:
   deploy-release.sh \
     --env-name <pre|www> \
     --target-host <ssh-host> \
-    --target-path <remote-dir> \
-    --compose-file <relative-compose-path> \
+    --target-path <remote-source-dir> \
+    --compose-file <compose-path> \
+    [--runtime-path <remote-compose-working-dir>] \
     [--source-ref <git-ref>] \
     [--base-url <url>] \
     [--allow-dirty]
 
 Deploys a specific Git ref to a remote host by exporting the source tree,
-syncing it to the fixed remote path, rebuilding there, and optionally running
-HTTP smoke checks against the target base URL.
+syncing it to the fixed remote source path, rebuilding on the remote host,
+and optionally running HTTP smoke checks against the target base URL.
 EOF
 }
 
@@ -30,6 +31,7 @@ ENV_NAME=""
 TARGET_HOST=""
 TARGET_PATH=""
 COMPOSE_FILE=""
+RUNTIME_PATH=""
 SOURCE_REF="HEAD"
 BASE_URL=""
 ALLOW_DIRTY="false"
@@ -50,6 +52,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --compose-file)
       COMPOSE_FILE="$2"
+      shift 2
+      ;;
+    --runtime-path)
+      RUNTIME_PATH="$2"
       shift 2
       ;;
     --source-ref)
@@ -103,6 +109,7 @@ git -C "$repo_root" rev-parse --verify "$SOURCE_REF" >/dev/null
 commit_sha="$(git -C "$repo_root" rev-parse "$SOURCE_REF")"
 branch_name="$(git -C "$repo_root" rev-parse --abbrev-ref "$SOURCE_REF" 2>/dev/null || echo detached)"
 timestamp="$(date '+%Y%m%d-%H%M%S')"
+runtime_path="${RUNTIME_PATH:-$TARGET_PATH}"
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -123,6 +130,7 @@ commit_sha=${commit_sha}
 branch_name=${branch_name}
 target_host=${TARGET_HOST}
 target_path=${TARGET_PATH}
+runtime_path=${runtime_path}
 compose_file=${COMPOSE_FILE}
 base_url=${BASE_URL}
 EOF
@@ -143,7 +151,7 @@ ssh "$TARGET_HOST" "mkdir -p '${TARGET_PATH}/.deploy-metadata'"
 scp "${release_record_dir}/manifest.txt" "${TARGET_HOST}:${TARGET_PATH}/.deploy-metadata/${timestamp}-${ENV_NAME}.manifest.txt" >/dev/null
 
 echo "Rebuilding and starting remote compose stack..."
-ssh "$TARGET_HOST" "cd '$TARGET_PATH' && docker compose -f '$COMPOSE_FILE' up -d --build"
+ssh "$TARGET_HOST" "cd '$runtime_path' && docker compose -f '$COMPOSE_FILE' up -d --build"
 
 if [[ -n "$BASE_URL" ]]; then
   echo "Running smoke checks against ${BASE_URL}..."

@@ -4,8 +4,6 @@ export function shouldBypassImageOptimization(src: string | null | undefined) {
     return /^(\/api\/uploads\/|\/uploads\/|https?:\/\/[^/]+\/api\/uploads\/|https?:\/\/[^/]+\/uploads\/)/i.test(src);
 }
 
-const UPLOADS_CACHE_BUSTER = '20260414';
-
 function encodePathname(pathname: string) {
     return pathname
         .split('/')
@@ -21,9 +19,6 @@ export function normalizeImageSrc(src: string | null | undefined) {
     if (isAbsolute) {
         const url = new URL(src);
         url.pathname = encodePathname(url.pathname);
-        if (shouldBypassImageOptimization(src) && !url.searchParams.has('v')) {
-            url.searchParams.set('v', UPLOADS_CACHE_BUSTER);
-        }
         return url.toString();
     }
 
@@ -32,10 +27,6 @@ export function normalizeImageSrc(src: string | null | undefined) {
     const params = new URLSearchParams(query);
 
     const normalizedPath = encodePathname(pathname);
-    if (shouldBypassImageOptimization(src) && !params.has('v')) {
-        params.set('v', UPLOADS_CACHE_BUSTER);
-    }
-
     const nextQuery = params.toString();
     return `${normalizedPath}${nextQuery ? `?${nextQuery}` : ''}${hash ? `#${hash}` : ''}`;
 }

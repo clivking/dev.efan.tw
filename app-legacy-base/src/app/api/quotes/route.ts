@@ -334,7 +334,7 @@ export async function POST(request: NextRequest) {
                     data: {
                         quoteId: newQuote.id,
                         name: '新項目',
-                        unit: '式',
+                        unit: '組',
                         quantity: 1,
                         unitPrice: 0,
                         costPrice: 0,

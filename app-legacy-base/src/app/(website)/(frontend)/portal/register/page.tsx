@@ -3,6 +3,10 @@
 import { FormEvent, Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
+import JsonLdScript from '@/components/common/JsonLdScript';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
+import { buildBreadcrumbSchema } from '@/lib/structured-data';
 import { formatMobile } from '@/lib/phone-format';
 
 interface ContactOption {
@@ -37,6 +41,15 @@ function PortalRegisterContent() {
     const [tokenError, setTokenError] = useState('');
     const [loading, setLoading] = useState(false);
     const [validating, setValidating] = useState(true);
+
+    const breadcrumbs = withHomeBreadcrumb({ label: '教學專區', href: '/portal' }, '註冊');
+    const breadcrumbSchema = buildBreadcrumbSchema(
+        toBreadcrumbSchemaItems(
+            breadcrumbs,
+            typeof window !== 'undefined' ? window.location.origin : '',
+            '/portal/register',
+        ),
+    );
 
     useEffect(() => {
         if (!token) {
@@ -101,8 +114,14 @@ function PortalRegisterContent() {
 
     if (validating) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-efan-primary" />
+            <div className="min-h-[60vh] px-4 py-16">
+                <JsonLdScript data={breadcrumbSchema} />
+                <div className="mx-auto max-w-6xl">
+                    <BreadcrumbTrail items={breadcrumbs} tone="light" className="mb-8" />
+                    <div className="flex items-center justify-center">
+                        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-efan-primary" />
+                    </div>
+                </div>
             </div>
         );
     }
@@ -110,6 +129,9 @@ function PortalRegisterContent() {
     if (tokenError) {
         return (
             <div className="min-h-[60vh] px-4 py-16">
+                <JsonLdScript data={breadcrumbSchema} />
+                <div className="mx-auto max-w-6xl">
+                    <BreadcrumbTrail items={breadcrumbs} tone="light" className="mb-8" />
                 <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-xl">
                     <div className="text-5xl">!</div>
                     <h1 className="mt-4 text-xl font-black text-gray-800">註冊連結無效</h1>
@@ -118,15 +140,18 @@ function PortalRegisterContent() {
                         返回網站首頁
                     </Link>
                 </div>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="flex w-full flex-col">
+            <JsonLdScript data={breadcrumbSchema} />
             <section className="bg-efan-primary py-20 text-white md:py-28">
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                     <div className="max-w-3xl">
+                        <BreadcrumbTrail items={breadcrumbs} tone="dark" className="mb-6" />
                         <div className="text-xs font-black uppercase tracking-[0.28em] text-white/60">客戶入口註冊</div>
                         <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">客戶入口帳號申請</h1>
                         <p className="mt-5 text-lg font-medium leading-relaxed text-white/75 md:text-xl">

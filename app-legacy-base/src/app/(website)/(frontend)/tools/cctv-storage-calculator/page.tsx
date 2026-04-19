@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import CctvStorageCalculator from '@/components/tools/CctvStorageCalculator';
 import JsonLdScript from '@/components/common/JsonLdScript';
 import PageBanner from '@/components/common/PageBanner';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { buildBreadcrumbSchema, buildFaqSchema } from '@/lib/structured-data';
 import { getRequestSiteContext } from '@/lib/site-url';
 import { CCTV_CALCULATOR_FAQ_ITEMS } from '@/lib/cctv-calculator-content';
@@ -48,11 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CctvStorageCalculatorPage() {
     const site = await getRequestSiteContext();
-    const breadcrumbSchema = buildBreadcrumbSchema([
-        { name: '首頁', item: site.origin },
-        { name: '實用工具', item: `${site.origin}/tools` },
-        { name: '監視器容量計算器', item: `${site.origin}/tools/cctv-storage-calculator` },
-    ]);
+    const breadcrumbs = withHomeBreadcrumb({ label: '實用工具', href: '/tools' }, '監視器容量計算器');
+    const breadcrumbSchema = buildBreadcrumbSchema(toBreadcrumbSchemaItems(breadcrumbs, site.origin, '/tools/cctv-storage-calculator'));
     const faqSchema = buildFaqSchema(CCTV_CALCULATOR_FAQ_ITEMS);
     const softwareSchema = buildSoftwareApplicationSchema(site.origin);
 
@@ -61,7 +59,7 @@ export default async function CctvStorageCalculatorPage() {
             <JsonLdScript data={breadcrumbSchema} />
             <JsonLdScript data={faqSchema} />
             <JsonLdScript data={softwareSchema} />
-            <PageBanner title="監視器容量計算器" />
+            <PageBanner title="監視器容量計算器" breadcrumbs={breadcrumbs} />
             <CctvStorageCalculator />
         </>
     );

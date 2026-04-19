@@ -1,8 +1,10 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
 import { getCompanyInfo } from '@/lib/company';
+import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { getSolutionFaqEntities } from '@/lib/content-entities';
 import { buildContentMetadata } from '@/lib/content-metadata';
 import { getRequestSiteContext } from '@/lib/site-url';
@@ -41,10 +43,10 @@ export default async function TaipeiCCTVPillarPage() {
     image: `${site.origin}/images/portfolio/weshaire-ai-face-recognition.webp`,
   });
   const faqSchema = buildFaqSchema(faqItems);
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: '解決方案', item: `${site.origin}/solutions` },
-    { name: '台北辦公室監視系統', item: `${site.origin}/solutions/taipei-cctv-system` },
-  ]);
+  const breadcrumbs = withHomeBreadcrumb('解決方案', '台北辦公室監視系統');
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    toBreadcrumbSchemaItems(breadcrumbs, site.origin, '/solutions/taipei-cctv-system'),
+  );
 
   const guideLinks = [
     { href: '/guides/cctv-system-planning-guide', label: '企業監視系統規劃指南' },
@@ -62,6 +64,7 @@ export default async function TaipeiCCTVPillarPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(192,132,252,0.16),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(96,165,250,0.16),transparent_24%)]" />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_460px] lg:items-center">
           <div>
+            <BreadcrumbTrail items={breadcrumbs} tone="dark" />
             <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.22em] text-violet-200">
               TAIPEI OFFICE CCTV
             </div>

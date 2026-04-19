@@ -56,7 +56,15 @@ export async function GET(
   const topLevelFolder = segments[0]?.toLowerCase();
 
   if (['customers', 'common', 'signatures'].includes(topLevelFolder)) {
-    return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'File not found' },
+      {
+        status: 404,
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   }
 
   const safePath = segments.join('/').replace(/\.\./g, '');
@@ -64,7 +72,15 @@ export async function GET(
 
   const filePath = await resolveFilePath(requestedPath);
   if (!filePath) {
-    return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'File not found' },
+      {
+        status: 404,
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   }
 
   const ext = path.extname(filePath).toLowerCase();

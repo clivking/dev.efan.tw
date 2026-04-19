@@ -6,6 +6,8 @@ This folder contains the active maintenance scripts for the project.
 
 - `check-db.ts`: lightweight DB connectivity and record-count check
 - `check-uploads-integrity.mjs`: checks `uploaded_files` references against the local uploads filesystem
+- `audit-canonical-uploads.mjs`: inventories uploads, DB/source references, canonical product path violations, and cleanup candidates without moving or deleting files
+- `migrate-canonical-product-assets.mjs`: copies safe product assets to canonical paths and updates `uploaded_files` when run with `--apply`
 - `fix-uploads-extension-drift.mjs`: repairs high-confidence extension drift in `uploaded_files`
 - `fix-uploads-document-mappings.mjs`: repairs high-confidence encoded-path and SOYAL manual document mappings
 - `db-check.mjs`: deeper manual DB audit used for phase verification
