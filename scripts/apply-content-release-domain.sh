@@ -106,7 +106,68 @@ if [[ "${#tables[@]}" -eq 0 ]]; then
 fi
 
 truncate_sql_file="$(mktemp)"
-trap 'rm -f "$truncate_sql_file"' EXIT
+cascade_check_sql_file="$(mktemp)"
+trap 'rm -f "$truncate_sql_file" "$cascade_check_sql_file"' EXIT
+
+protected_tables=(
+  customers
+  company_names
+  contacts
+  locations
+  quotes
+  quote_variants
+  quote_items
+  quote_contacts
+  quote_tokens
+  quote_views
+  quote_signatures
+  payments
+)
+
+{
+  echo "WITH RECURSIVE target(relid) AS ("
+  for ((i=0; i<${#tables[@]}; i++)); do
+    prefix="  SELECT"
+    if [[ "$i" -gt 0 ]]; then
+      prefix="  UNION SELECT"
+    fi
+    printf "%s %s::regclass\n" "$prefix" "'${tables[$i]}'"
+  done
+  echo "), cascade_targets(relid, path) AS ("
+  echo "  SELECT relid, ARRAY[relid] FROM target"
+  echo "  UNION"
+  echo "  SELECT c.conrelid, ct.path || c.conrelid"
+  echo "  FROM pg_constraint c"
+  echo "  JOIN cascade_targets ct ON c.confrelid = ct.relid"
+  echo "  WHERE c.contype = 'f'"
+  echo "    AND NOT c.conrelid = ANY(ct.path)"
+  echo "), protected(relname) AS ("
+  for ((i=0; i<${#protected_tables[@]}; i++)); do
+    prefix="  SELECT"
+    if [[ "$i" -gt 0 ]]; then
+      prefix="  UNION SELECT"
+    fi
+    printf "%s %s\n" "$prefix" "'${protected_tables[$i]}'"
+  done
+  echo ")"
+  echo "SELECT DISTINCT ct.relid::regclass::text"
+  echo "FROM cascade_targets ct"
+  echo "JOIN protected p ON p.relname = ct.relid::regclass::text"
+  echo "ORDER BY 1;"
+} > "$cascade_check_sql_file"
+
+echo "Checking TRUNCATE CASCADE impact before applying content-release tables..."
+protected_hits="$(
+  docker exec -i "$TARGET_DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U "$TARGET_DB_USER" -d "$TARGET_DB_NAME" -tA \
+    -f /dev/stdin < "$cascade_check_sql_file"
+)"
+
+if [[ -n "$protected_hits" ]]; then
+  echo "Refusing to apply content-release artifact because TRUNCATE CASCADE would touch protected customer/quote tables:" >&2
+  echo "$protected_hits" >&2
+  echo "Use a narrower table list or an upsert-based content promotion path instead." >&2
+  exit 1
+fi
 
 {
   echo "BEGIN;"
