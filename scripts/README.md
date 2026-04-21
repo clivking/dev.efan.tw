@@ -9,6 +9,9 @@ Current release-flow helpers:
 - `export-customer-quote-domain.sh`: export the selective customer/quote domain from `www` or another source DB
 - `apply-customer-quote-domain.sh`: apply a selective customer/quote domain artifact onto the target DB
 - `run-customer-quote-sync.sh`: one-command wrapper for Step 3 backup, apply, and smoke-check flow
+- `export-content-release-domain.sh`: export release-owned content tables for Step 5 promotion
+- `apply-content-release-domain.sh`: apply release-owned content tables onto the target DB while preserving customer/quote data
+- `run-content-release-sync.sh`: one-command wrapper for Step 5 content-domain apply, dependency checks, and smoke-check flow
 - `run-release-smoke-checks.sh`: lightweight HTTP smoke checks for `dev`, `pre`, or `www`
 - `check-dev-uploads-mount.sh`: verify `efan-dev-web` did not start with an empty `tmpfs` at `/app/public/uploads`
 - `deploy-release.sh`: generic remote source deploy with remote rebuild, optional separate runtime path, and release manifest
@@ -17,7 +20,10 @@ Current release-flow helpers:
 - `create-portable-backup.sh`: shared portable-backup implementation
 - `check-customer-quote-sync-dependencies.sh`: validate quote-domain dependency integrity before or after selective sync
 - `check-customer-quote-sync-dependencies.sql`: SQL checks used by the dependency validator
+- `check-content-release-sync-dependencies.sh`: validate release-owned content dependencies after Step 5 content sync
+- `check-content-release-sync-dependencies.sql`: SQL checks used by the Step 5 content validator
 - `customer-quote-sync-primary-tables.txt`: canonical primary table scope for Step 3 selective sync
+- `content-release-primary-tables.txt`: canonical release-owned table scope for Step 5 content sync
 
 ## Current Deployment Caveats
 
@@ -29,7 +35,10 @@ These helpers describe the intended long-term direction, but the current Mac min
 - do not let a source sync delete the remote `docker-compose.yml` for `www`
 - exclude scratch paths such as `temp_web` when syncing the current `www` source tree
 - verify the actual compose service names from the remote runtime compose file before restarting `pre` or `www`
+- current Mac mini helper runs must tolerate BSD userland differences such as `realpath` without `-m` and the absence of `sha256sum`
+- current `www` backup and Step 3 export are safe to run on the Mac mini only after those portability gaps are handled
 - if Step 3 was executed in the same run, create a new `dev` backup after Step 3 and use that post-Step-3 backup for any Step 4 `pre` DB or uploads refresh
+- current `pre` refresh is effectively a full transit rebuild: sync code into `/Users/cliv/efan_server/build_context_pre/dev.efan.tw`, rebuild `efan-nextjs-pre:latest`, restore the latest `dev` DB into `efan_pre_db`, replace `pre_pre_uploads`, then run smoke checks
 
 ## Uploads mount check
 

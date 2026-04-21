@@ -1,0 +1,4 @@
+product_categories
+products
+pages
+guide_articles

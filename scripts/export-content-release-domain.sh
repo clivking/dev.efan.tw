@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  export-customer-quote-domain.sh \
+  export-content-release-domain.sh \
     --source-db-container <name> \
     --source-db-user <user> \
     --source-db-name <db> \
@@ -12,8 +12,8 @@ Usage:
     [--env-name <name>] \
     [--table-list <path>]
 
-Exports the primary customer/quote sync domain as a gzipped SQL artifact that can
-be transferred from `www` to `dev` and later applied selectively.
+Exports the release-owned content domain as a gzipped SQL artifact that can
+be promoted from `pre` or `dev` into `www` without moving the customer/quote domain.
 EOF
 }
 
@@ -54,7 +54,7 @@ SOURCE_DB_CONTAINER=""
 SOURCE_DB_USER=""
 SOURCE_DB_NAME=""
 BACKUP_ROOT=""
-ENV_NAME="www"
+ENV_NAME="pre"
 TABLE_LIST=""
 
 while [[ $# -gt 0 ]]; do
@@ -106,7 +106,7 @@ require_cmd date
 require_cmd python3
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-table_list="${TABLE_LIST:-${repo_root}/scripts/customer-quote-sync-primary-tables.txt}"
+table_list="${TABLE_LIST:-${repo_root}/scripts/content-release-primary-tables.txt}"
 backup_root="${BACKUP_ROOT:-${EFAN_BACKUP_ROOT:-/home/cliv/projects/backup-efan.tw}}"
 backup_root="$(resolve_path "$backup_root" true)"
 
@@ -122,9 +122,9 @@ if [[ "${#tables[@]}" -eq 0 ]]; then
 fi
 
 timestamp="$(date '+%Y%m%d-%H%M%S')"
-export_dir="${backup_root}/${timestamp}-${ENV_NAME}-customer-quote-sync"
+export_dir="${backup_root}/${timestamp}-${ENV_NAME}-content-release-sync"
 mkdir -p "${export_dir}"
-artifact_name="customer-quote-sync-${ENV_NAME}-${timestamp}.sql.gz"
+artifact_name="content-release-sync-${ENV_NAME}-${timestamp}.sql.gz"
 
 pg_dump_args=(
   pg_dump
@@ -139,7 +139,7 @@ for table_name in "${tables[@]}"; do
   pg_dump_args+=(--table="$table_name")
 done
 
-echo "Exporting customer/quote domain from ${SOURCE_DB_CONTAINER}..."
+echo "Exporting content-release domain from ${SOURCE_DB_CONTAINER}..."
 docker exec "$SOURCE_DB_CONTAINER" "${pg_dump_args[@]}" | gzip > "${export_dir}/${artifact_name}"
 
 {
@@ -160,5 +160,5 @@ cp "$table_list" "${export_dir}/$(basename "$table_list")"
   checksum_file "$artifact_name" manifest.txt "$(basename "$table_list")" > sha256.txt
 )
 
-echo "Selective sync export created at: ${export_dir}/${artifact_name}"
+echo "Content-release export created at: ${export_dir}/${artifact_name}"
 echo "Manifest: ${export_dir}/manifest.txt"

@@ -123,6 +123,8 @@ Current practical notes:
 - current `www` runtime depends on the remote file `/Users/cliv/efan_server/nextjs/docker-compose.yml`
 - that remote `docker-compose.yml` is runtime state and must not be deleted by a source sync from this repo
 - the repo-level `compose.yaml` in `/Users/cliv/efan_server/nextjs` is not the production release entrypoint for Step 5
+- current `www` repo snapshots should exclude scratch paths such as `temp_web`
+- when Step 2 or Step 3 helper scripts run on the Mac mini, they must tolerate BSD userland differences such as `realpath` without `-m` and the absence of `sha256sum`
 
 Current script entrypoint:
 
@@ -266,6 +268,7 @@ Current practical warning:
 
 - if `pre` is refreshed from `dev` data, the backup package used for the `pre` DB and uploads refresh must be newer than the latest Step 3 selective sync; otherwise `pre` can be rebuilt with stale customer or quote records even when code deploy succeeds
 - current `pre` source sync should target the remote build-context tree and must not assume the runtime compose directory contains the full source tree
+- current practical refresh order is: sync source into `/Users/cliv/efan_server/build_context_pre/dev.efan.tw`, rebuild `efan-nextjs-pre:latest` on the Mac host, stop `efan_pre_web`, replace `efan_pre_db` from the post-Step-3 `dev` state, replace `pre_pre_uploads`, then start the runtime compose stack again
 
 Only after `pre` passes should the release move to `www`.
 
@@ -283,16 +286,40 @@ The production-safe target is:
 
 - promote code and release-approved content changes
 - preserve `www` as the source of truth for live customer and quote records
+- promote release-owned content from `pre` to `www`
+
+For this project, treat these as release-owned content authored in `dev` and promoted through `pre`:
+
+- `products`
+- `product_categories`
+- `pages`
+- `guide_articles`
+
+The preserved `www` production-truth domain remains:
+
+- `customers`
+- `company_names`
+- `contacts`
+- `locations`
+- `quotes`
+- `quote_items`
+- `quote_contacts`
+- `quote_tokens`
+- `quote_views`
+- `quote_signatures`
+- `quote_variants`
+- `payments`
 
 ### Step 5 Runtime Rule
 
-Current `www` promotion is a production web-image refresh, not a `pre` DB restore.
+Current `www` promotion is not a full `pre` DB restore, but it is also not safely complete as a code-only web-image refresh when the release contains DB-backed content.
 
 That means:
 
 - rebuild the intended release on the Mac host for the production web image
 - restart the production web container against the existing production DB and uploads volume
-- do not replace `www` DB data with `pre` or `dev` DB data during a normal Step 5
+- do not replace the preserved `www` customer/quote domain with `pre` or `dev` data during a normal Step 5
+- do promote release-owned DB-backed content such as `products`, `product_categories`, `pages`, and `guide_articles`
 - do not replace `www` uploads with `pre` or `dev` uploads during a normal Step 5
 
 ### Step 5 Source-Sync Rule
@@ -317,6 +344,13 @@ After deploy to `www`, validate:
 5. existing production quotes still load
 6. uploads resolve
 7. release record includes branch, commit, backup set, and rollback target
+
+Do not treat Step 5 as complete until release-specific DB-backed content is validated on `www`, for example:
+
+- product pages changed in the release return `200`
+- category pages changed in the release return `200`
+- page slugs changed in the release return `200`
+- guide slugs changed in the release return `200`
 
 Current smoke-check entrypoint:
 

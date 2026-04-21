@@ -28,6 +28,21 @@ require_cmd() {
   fi
 }
 
+resolve_path() {
+  python3 - <<'PY' "$1" "${2:-false}"
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1]).expanduser()
+allow_missing = sys.argv[2].lower() == "true"
+
+if allow_missing:
+    print(path.resolve(strict=False))
+else:
+    print(path.resolve())
+PY
+}
+
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
@@ -53,6 +68,17 @@ copy_if_exists() {
     cp -a "$src" "$dest_dir/"
   else
     echo "Warning: path not found, skipping: $src" >&2
+  fi
+}
+
+checksum_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$@"
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$@"
+  else
+    echo "Missing required command: sha256sum or shasum" >&2
+    exit 1
   fi
 }
 
@@ -129,18 +155,17 @@ fi
 require_cmd docker
 require_cmd gzip
 require_cmd tar
-require_cmd sha256sum
 require_cmd date
 require_cmd python3
 
-REPO_PATH="$(realpath "$REPO_PATH")"
-BACKUP_ROOT="$(realpath -m "$BACKUP_ROOT")"
-UPLOADS_PATH="$(realpath "$UPLOADS_PATH")"
+REPO_PATH="$(resolve_path "$REPO_PATH")"
+BACKUP_ROOT="$(resolve_path "$BACKUP_ROOT" true)"
+UPLOADS_PATH="$(resolve_path "$UPLOADS_PATH")"
 if [[ -n "$COMPOSE_FILE" ]]; then
-  COMPOSE_FILE="$(realpath "$COMPOSE_FILE")"
+  COMPOSE_FILE="$(resolve_path "$COMPOSE_FILE")"
 fi
 if [[ -n "$ENV_FILE" ]]; then
-  ENV_FILE="$(realpath "$ENV_FILE")"
+  ENV_FILE="$(resolve_path "$ENV_FILE")"
 fi
 
 timestamp="$(date '+%Y%m%d-%H%M%S')"
@@ -179,7 +204,7 @@ if [[ -n "$COMPOSE_FILE" ]]; then
 fi
 
 for extra_path in "${EXTRA_PATHS[@]}"; do
-  extra_path="$(realpath "$extra_path")"
+  extra_path="$(resolve_path "$extra_path")"
   echo "Copying extra path ${extra_path}..."
   copy_if_exists "$extra_path" "${backup_dir}/infra"
 done
@@ -232,7 +257,9 @@ EOF
 
 (
   cd "$backup_dir"
-  find . -type f ! -path './checksums/*' -print0 | sort -z | xargs -0 sha256sum > checksums/sha256.txt
+  while IFS= read -r -d '' file; do
+    checksum_file "$file"
+  done < <(find . -type f ! -path './checksums/*' -print0 | sort -z) > checksums/sha256.txt
 )
 
 echo "Backup created at: ${backup_dir}"
