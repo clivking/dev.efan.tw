@@ -49,9 +49,10 @@ export default async function TaipeiCCTVPillarPage() {
   );
 
   const guideLinks = [
-    { href: '/guides/cctv-system-planning-guide', label: '企業監視系統規劃指南' },
-    { href: '/guides/security-nda-compliance-guide', label: '安防合規完整指南' },
-    { href: '/locations/taipei-access-control', label: '台北門禁系統 Location 頁' },
+    { href: '/guides/cctv-installation-planning-guide', label: '監視器安裝怎麼規劃' },
+    { href: '/guides/cctv-system-pricing-guide', label: '監視器價格怎麼算' },
+    { href: '/guides/office-cctv-system-guide', label: '辦公室監視器怎麼選' },
+    { href: '/guides/cctv-storage-and-nvr-planning-guide', label: '監視器容量、焦距與 NVR 怎麼一起規劃' },
   ];
 
   return (

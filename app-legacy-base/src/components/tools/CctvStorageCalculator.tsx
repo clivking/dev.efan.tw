@@ -357,6 +357,20 @@ export default function CctvStorageCalculator() {
                                 本工具以通用碼流模型估算，結果適合做容量規劃、預算抓法與初步採購判斷。不同品牌編碼效率、夜間噪點與場景動態，都可能影響實際錄影天數。
                             </p>
                         </div>
+                        <div className="mt-8 grid gap-4 md:grid-cols-3">
+                            <Link href="/guides/cctv-storage-and-nvr-planning-guide" className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm">
+                                <div className="text-lg font-black text-slate-950">容量、焦距與 NVR 規劃指南</div>
+                                <p className="mt-2 text-sm leading-7 text-slate-600">把試算結果接回實際鏡頭、主機與硬碟配置。</p>
+                            </Link>
+                            <Link href="/guides/cctv-system-pricing-guide" className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm">
+                                <div className="text-lg font-black text-slate-950">監視器價格怎麼算</div>
+                                <p className="mt-2 text-sm leading-7 text-slate-600">如果你正要比較預算與報價，這篇更適合接著看。</p>
+                            </Link>
+                            <Link href="/services/cctv" className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm">
+                                <div className="text-lg font-black text-slate-950">監視系統規劃服務</div>
+                                <p className="mt-2 text-sm leading-7 text-slate-600">若你已接近採購階段，可以直接把容量與保存需求帶進正式規劃。</p>
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </section>

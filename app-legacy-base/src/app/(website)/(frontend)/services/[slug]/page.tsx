@@ -111,6 +111,10 @@ const SERVICE_CONTENT: Record<(typeof SERVICE_SLUGS)[number], ServiceContent> = 
             { title: '監視器容量計算器', href: '/tools/cctv-storage-calculator', description: '先試算攝影機數量、畫質、FPS 與保存天數需要多少硬碟容量，再比較 NVR 與硬碟配置。' },
             { title: '監視器焦距計算器', href: '/tools/cctv-focal-length-calculator', description: '先抓門口、櫃台、走道或車道口大概要用幾 mm 鏡頭，再回頭確認畫面範圍與焦段。' },
             { title: '台北監視系統解決方案', href: '/solutions/taipei-cctv-system', description: '如果你要看的是台北辦公室、店面或社區案場的整體規劃方式，這頁會更貼近實務情境。' },
+            { title: '監視器安裝怎麼規劃', href: '/guides/cctv-installation-planning-guide', description: '先把鏡頭任務、NVR、施工與保存天數的整體規劃順序想清楚。' },
+            { title: '監視器價格怎麼算', href: '/guides/cctv-system-pricing-guide', description: '整理鏡頭、NVR、硬碟、施工與維護費用怎麼一起看。' },
+            { title: '監視器容量、焦距與 NVR 怎麼一起規劃', href: '/guides/cctv-storage-and-nvr-planning-guide', description: '把工具試算結果接回實際採購規格，避免只停在大概估算。' },
+            { title: '門市監視器怎麼規劃', href: '/guides/retail-store-cctv-guide', description: '如果你的場景是店面或零售通路，這篇會比一般辦公室更貼近實務。' },
         ],
         faq: [
             { q: '監視系統需要幾支攝影機才夠？', a: '要看出入口數量、畫面範圍與管理重點，通常會先確認哪些位置一定要看得到，再決定鏡頭數量與焦段。' },

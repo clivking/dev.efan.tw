@@ -47,7 +47,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const activeTopic = GUIDE_TOPIC_CONFIGS.find((item) => item.key === params.topic) || null;
   const title = activeTopic ? `${activeTopic.label}指南與採購重點整理｜${company.name}` : `知識指南與採購判斷整理｜${company.name}`;
   const description = activeTopic
-    ? `整理 ${activeTopic.label} 的採購重點、規劃流程、比較文與常見問題，協助企業在導入或升級前快速收斂方向。`
+    ? `整理 ${activeTopic.label} 的採購重點、規劃流程、比較文與常見問題，協助企業在導入或升級前更快掌握評估方向。`
     : '集中整理門禁、對講、電話總機、監視與弱電整合的採購指南、比較文、案例與 FAQ。';
 
   return buildContentMetadata({
@@ -315,7 +315,7 @@ export default async function GuidesPage({ searchParams }: Props) {
             <div className="text-sm font-bold tracking-[0.18em] text-slate-400">NEXT STEP</div>
             <h2 className="mt-2 text-2xl font-black text-slate-950">需要實際規劃？</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              如果你已經從文章找到方向，下一步通常不是再看更多內容，而是把需求整理成可估價、可施工、可管理的規格。
+              如果你已經從文章找到方向，下一步通常不是再看更多內容，而是把需求整理成可估價、可施工、可管理的規格表。
             </p>
             <div className="mt-5 space-y-3">
               <Link href="/services/access-control" className="block rounded-2xl border border-slate-200 px-4 py-3 font-bold text-slate-900 transition hover:border-slate-900">

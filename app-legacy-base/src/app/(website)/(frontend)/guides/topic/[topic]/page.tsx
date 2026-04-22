@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const config = getGuideTopicConfig(topic) || getFallbackTopicConfig(topic);
 
   const title = `${config.label}指南與採購重點整理｜${company.name}`;
-  const description = `整理 ${config.label} 的採購重點、規劃流程、比較文與 FAQ，協助企業在導入或升級前快速收斂方向。`;
+  const description = `整理 ${config.label} 的採購重點、規劃流程、比較文與 FAQ，協助企業在導入或升級前更快掌握評估方向。`;
 
   return buildContentMetadata({
     site,
@@ -67,7 +67,7 @@ export default async function GuideTopicPage({ params }: Props) {
               </div>
               <h1 className="mt-5 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">{config.label}</h1>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-                {config.description} 這一頁會集中顯示同主題的指南、比較文與後續可採取的下一步，讓採購與管理層可以快速收斂方向。
+                {config.description} 這一頁會集中顯示同主題的指南、比較文與後續可採取的下一步，讓採購與管理層更快掌握評估重點。
               </p>
             </div>
 

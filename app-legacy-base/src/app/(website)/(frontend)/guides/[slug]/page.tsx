@@ -21,6 +21,8 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+export const revalidate = 0;
+
 function toDate(value: unknown): Date | null {
   if (value instanceof Date) return value;
   if (typeof value === 'string' || typeof value === 'number') {
@@ -87,6 +89,13 @@ function normalizeGuideArticleHtml(content: string) {
       return `<p>${normalizedInner}</p>`;
     })
     .replace(/(<\/(?:h2|h3|ul|ol|blockquote|table|figure)>)\s*(?:<br\s*\/?>\s*)+/gi, '$1')
+    .replace(/<table>/gi, '<div class="guide-table-wrap"><table class="guide-table">')
+    .replace(/<thead>/gi, '<thead class="guide-table-head">')
+    .replace(/<tbody>/gi, '<tbody class="guide-table-body">')
+    .replace(/<tr>/gi, '<tr class="guide-table-row">')
+    .replace(/<th>/gi, '<th class="guide-table-th">')
+    .replace(/<td>/gi, '<td class="guide-table-td">')
+    .replace(/<\/table>/gi, '</table></div>')
     .replace(/(?:<br\s*\/?>\s*){3,}/gi, '<br />');
 }
 
@@ -246,6 +255,15 @@ export default async function GuideDetailPage({ params }: Props) {
 
   const summaryItems = buildSummaryItems(guide);
   const relatedServices = getServiceEntitiesBySlugs(guide.relatedServiceSlugList);
+  const primaryService =
+    relatedServices[0] ??
+    (guide.relatedServiceSlugList[0]
+      ? {
+          slug: guide.relatedServiceSlugList[0],
+          href: `/services/${guide.relatedServiceSlugList[0]}`,
+          name: getServiceLabel(guide.relatedServiceSlugList[0]),
+        }
+      : null);
   const articleContent = buildGuideContentWithAnchors(guide.content);
   const titleParts = splitGuideTitle(guide.title);
 
@@ -344,9 +362,11 @@ export default async function GuideDetailPage({ params }: Props) {
                 <Link href="/quote-request" className="block rounded-2xl bg-slate-950 px-4 py-3 text-center font-bold text-white transition hover:bg-slate-800">
                   預約需求盤點
                 </Link>
-                <Link href="/services/access-control" className="block rounded-2xl border border-slate-300 px-4 py-3 text-center font-bold text-slate-900 transition hover:border-slate-900">
-                  看門禁服務方案
-                </Link>
+                {primaryService ? (
+                  <Link href={primaryService.href} className="block rounded-2xl border border-slate-300 px-4 py-3 text-center font-bold text-slate-900 transition hover:border-slate-900">
+                    {`看${primaryService.name}服務方案`}
+                  </Link>
+                ) : null}
               </div>
             </div>
           </section>
@@ -363,7 +383,7 @@ export default async function GuideDetailPage({ params }: Props) {
           <section className="border-t border-slate-300/70 pt-8 md:pt-10">
             <div
               id="guide-body"
-              className="prose prose-slate max-w-none text-[18px] leading-9 prose-headings:scroll-mt-28 prose-headings:font-black prose-headings:tracking-[-0.035em] prose-headings:text-balance prose-headings:text-slate-950 prose-p:my-8 prose-p:max-w-none prose-p:text-slate-700 prose-p:text-[1.2rem] prose-p:font-medium prose-p:leading-[2.15] prose-p:[text-wrap:pretty] prose-p:first-of-type:text-[1.38rem] prose-p:first-of-type:font-semibold prose-p:first-of-type:leading-[1.95] prose-p:first-of-type:text-slate-900 prose-a:font-semibold prose-a:text-[#1d4ed8] prose-strong:font-black prose-strong:text-slate-950 prose-table:my-10 prose-table:overflow-hidden prose-table:rounded-2xl prose-table:border prose-table:border-slate-200 prose-thead:border-b prose-thead:border-slate-200 prose-thead:bg-stone-50 prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:text-sm prose-th:font-black prose-th:text-slate-900 prose-td:px-4 prose-td:py-3 prose-td:text-sm prose-td:leading-7 prose-blockquote:my-12 prose-blockquote:max-w-none prose-blockquote:border-l-4 prose-blockquote:border-amber-400 prose-blockquote:bg-amber-50/60 prose-blockquote:px-6 prose-blockquote:py-5 prose-blockquote:text-[1.08rem] prose-blockquote:font-medium prose-blockquote:text-slate-700 [&_h2]:mt-20 [&_h2]:mb-8 [&_h2]:border-t [&_h2]:border-slate-200 [&_h2]:pt-10 [&_h2]:text-[2.7rem] [&_h2]:leading-[1.1] [&_h3]:mt-12 [&_h3]:mb-5 [&_h3]:border-l-4 [&_h3]:border-slate-900 [&_h3]:pl-4 [&_h3]:text-[1.9rem] [&_h3]:leading-tight [&_ul]:my-10 [&_ul]:max-w-none [&_ul]:list-none [&_ul]:space-y-4 [&_ul]:pl-0 [&_ul>li]:rounded-[1.35rem] [&_ul>li]:border [&_ul>li]:border-slate-200 [&_ul>li]:bg-white/75 [&_ul>li]:px-5 [&_ul>li]:py-4 [&_ul>li]:text-[1.08rem] [&_ul>li]:leading-8 [&_ul>li]:shadow-[0_8px_24px_rgba(15,23,42,0.04)] [&_ol]:my-10 [&_ol]:max-w-none [&_ol]:space-y-4 [&_ol]:pl-7 [&_ol>li]:pl-2 [&_ol>li]:text-[1.08rem] [&_ol>li]:leading-8"
+              className="prose prose-slate max-w-none text-[18px] leading-9 prose-headings:scroll-mt-28 prose-headings:font-black prose-headings:tracking-[-0.035em] prose-headings:text-balance prose-headings:text-slate-950 prose-p:my-8 prose-p:max-w-none prose-p:text-slate-700 prose-p:text-[1.2rem] prose-p:font-medium prose-p:leading-[2.15] prose-p:[text-wrap:pretty] prose-p:first-of-type:text-[1.38rem] prose-p:first-of-type:font-semibold prose-p:first-of-type:leading-[1.95] prose-p:first-of-type:text-slate-900 prose-a:font-semibold prose-a:text-[#1d4ed8] prose-strong:font-black prose-strong:text-slate-950 prose-blockquote:my-12 prose-blockquote:max-w-none prose-blockquote:border-l-4 prose-blockquote:border-amber-400 prose-blockquote:bg-amber-50/60 prose-blockquote:px-6 prose-blockquote:py-5 prose-blockquote:text-[1.08rem] prose-blockquote:font-medium prose-blockquote:text-slate-700 [&_.guide-table-wrap]:my-10 [&_.guide-table-wrap]:overflow-x-auto [&_.guide-table-wrap]:rounded-[1.6rem] [&_.guide-table-wrap]:border-2 [&_.guide-table-wrap]:border-slate-300 [&_.guide-table-wrap]:bg-white [&_.guide-table-wrap]:shadow-[0_12px_32px_rgba(15,23,42,0.06)] [&_.guide-table]:m-0 [&_.guide-table]:w-full [&_.guide-table]:min-w-[720px] [&_.guide-table]:border-collapse [&_.guide-table-head]:bg-stone-100 [&_.guide-table-row:nth-child(even)]:bg-stone-50/60 [&_.guide-table-th]:whitespace-nowrap [&_.guide-table-th]:border [&_.guide-table-th]:border-slate-300 [&_.guide-table-th]:px-4 [&_.guide-table-th]:py-3 [&_.guide-table-th]:text-left [&_.guide-table-th]:text-sm [&_.guide-table-th]:font-black [&_.guide-table-th]:text-slate-900 [&_.guide-table-td]:border [&_.guide-table-td]:border-slate-300 [&_.guide-table-td]:px-4 [&_.guide-table-td]:py-3 [&_.guide-table-td]:align-top [&_.guide-table-td]:text-sm [&_.guide-table-td]:leading-7 [&_h2]:mt-20 [&_h2]:mb-8 [&_h2]:border-t [&_h2]:border-slate-200 [&_h2]:pt-10 [&_h2]:text-[2.7rem] [&_h2]:leading-[1.1] [&_h3]:mt-12 [&_h3]:mb-5 [&_h3]:border-l-4 [&_h3]:border-slate-900 [&_h3]:pl-4 [&_h3]:text-[1.9rem] [&_h3]:leading-tight [&_ul]:my-10 [&_ul]:max-w-none [&_ul]:list-none [&_ul]:space-y-4 [&_ul]:pl-0 [&_ul>li]:rounded-[1.35rem] [&_ul>li]:border [&_ul>li]:border-slate-200 [&_ul>li]:bg-white/75 [&_ul>li]:px-5 [&_ul>li]:py-4 [&_ul>li]:text-[1.08rem] [&_ul>li]:leading-8 [&_ul>li]:shadow-[0_8px_24px_rgba(15,23,42,0.04)] [&_ol]:my-10 [&_ol]:max-w-none [&_ol]:space-y-4 [&_ol]:pl-7 [&_ol>li]:pl-2 [&_ol>li]:text-[1.08rem] [&_ol>li]:leading-8"
               dangerouslySetInnerHTML={{ __html: articleContent.html }}
             />
           </section>
@@ -413,10 +433,10 @@ export default async function GuideDetailPage({ params }: Props) {
               <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
                   <div className="text-sm font-bold tracking-[0.18em] text-slate-400">SERVICES</div>
-                  <h2 className="mt-2 text-2xl font-black text-slate-950">把判斷延伸成規劃</h2>
+                  <h2 className="mt-2 text-2xl font-black text-slate-950">延伸服務建議</h2>
                 </div>
                 <p className="hidden max-w-sm text-sm leading-6 text-slate-500 md:block">
-                  如果你已經從文章整理出需求方向，下一步通常是把場景與管理規則收斂成可報價的規格。
+                  如果你已經看完文章，下一步通常就是把場景、管理需求與施工條件整理成可報價的規格。
                 </p>
               </div>
               <div className="grid gap-4 md:grid-cols-3">
@@ -470,7 +490,7 @@ export default async function GuideDetailPage({ params }: Props) {
                     </div>
                     <div className="border-t border-slate-200 px-4 py-4">
                       <div className="text-[11px] font-bold tracking-[0.18em] text-slate-400">
-                        {[product.brand, product.model].filter(Boolean).join(' / ') || 'PRODUCT'}
+                        {[product.brand, product.model?.replace(/\s*\/\s*/g, '/')].filter(Boolean).join('/') || 'PRODUCT'}
                       </div>
                       <div className="mt-1 text-sm font-black leading-6 text-slate-950">{product.name}</div>
                     </div>
@@ -484,9 +504,9 @@ export default async function GuideDetailPage({ params }: Props) {
             <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_240px] md:items-end">
               <div>
                 <div className="text-sm font-bold tracking-[0.18em] text-slate-400">NEXT STEP</div>
-                <h2 className="mt-2 text-3xl font-black tracking-[-0.03em]">把文章裡的判斷，變成可執行規格</h2>
+                <h2 className="mt-2 text-3xl font-black tracking-[-0.03em]">把需求整理成正式方案</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
-                  如果你已經接近採購或升級階段，下一步通常不是再讀更多資料，而是把現場條件、門點數量、權限設計與整合需求整理清楚。
+                  如果你已經進入採購或汰換評估階段，下一步通常不是再看更多文章，而是把現場條件、設備數量、管理需求與整合範圍整理清楚。
                 </p>
               </div>
               <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
@@ -498,9 +518,11 @@ export default async function GuideDetailPage({ params }: Props) {
               <Link href="/quote-request" className="rounded-full bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-300">
                 直接詢價
               </Link>
-              <Link href="/services/access-control" className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">
-                看服務項目
-              </Link>
+              {primaryService ? (
+                <Link href={primaryService.href} className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+                  {`看${primaryService.name}服務`}
+                </Link>
+              ) : null}
               <Link href="/products" className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">
                 看產品目錄
               </Link>

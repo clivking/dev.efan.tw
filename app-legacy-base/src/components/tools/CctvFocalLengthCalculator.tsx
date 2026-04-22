@@ -372,11 +372,15 @@ export default function CctvFocalLengthCalculator() {
 
                     <section className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#eff6ff_0%,#ffffff_100%)] p-8 shadow-sm">
                         <div className="text-sm font-bold tracking-[0.18em] text-sky-700">RELATED</div>
-                        <h2 className="mt-2 text-2xl font-black text-slate-950">如果你已經抓到焦距，下一步通常是這兩件事</h2>
-                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                        <h2 className="mt-2 text-2xl font-black text-slate-950">如果你已經抓到焦距，下一步通常是這三件事</h2>
+                        <div className="mt-6 grid gap-4 md:grid-cols-3">
                             <Link href="/tools/cctv-storage-calculator" className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm">
                                 <div className="text-lg font-black text-slate-950">監視器容量計算器</div>
                                 <p className="mt-2 text-sm leading-7 text-slate-600">繼續試算 NVR / 硬碟需要多大容量，或反推大概能保存幾天。</p>
+                            </Link>
+                            <Link href="/guides/cctv-storage-and-nvr-planning-guide" className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm">
+                                <div className="text-lg font-black text-slate-950">容量、焦距與 NVR 規劃指南</div>
+                                <p className="mt-2 text-sm leading-7 text-slate-600">把工具試算結果轉成可採購規格，避免只停在 mm 與大概容量。</p>
                             </Link>
                             <Link href="/services/cctv" className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm">
                                 <div className="text-lg font-black text-slate-950">監視系統規劃服務</div>
