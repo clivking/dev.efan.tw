@@ -67,6 +67,19 @@ const settingsData = [
   ['ai_chat_max_history', '20', 'number', 'ai', 'AI 對話最大歷史筆數'],
   ['ai_monthly_budget', '10', 'number', 'ai', 'AI monthly budget (USD)'],
   ['telegram_chat_id_customer_service', '', 'string', 'telegram', 'AI 客服 Telegram Chat ID'],
+  ['security_login_failure_window_minutes', '15', 'number', 'security', '登入失敗計算時間窗（分鐘）'],
+  ['security_login_failure_attempt_limit', '5', 'number', 'security', '同帳號或 IP 在時間窗內最多允許失敗次數'],
+  ['security_login_lock_minutes', '30', 'number', 'security', '超過登入失敗次數後的暫時鎖定分鐘數'],
+  ['security_alert_new_ip_login', 'true', 'boolean', 'security', '新 IP 登入時發送 Telegram 告警'],
+  ['security_alert_failed_login_burst', 'true', 'boolean', 'security', '短時間大量登入失敗時發送 Telegram 告警'],
+  ['security_failed_login_burst_threshold', '5', 'number', 'security', '短時間登入失敗告警門檻'],
+  ['security_alert_off_hours_login', 'true', 'boolean', 'security', '離峰時段登入時發送 Telegram 告警'],
+  ['security_off_hours_start', '22:00', 'string', 'security', '離峰時段開始時間（24 小時制）'],
+  ['security_off_hours_end', '06:00', 'string', 'security', '離峰時段結束時間（24 小時制）'],
+  ['security_session_days', '30', 'number', 'security', '管理後台登入 session 保留天數'],
+  ['audit_retention_security_days', '365', 'number', 'security', '安全稽核紀錄保留天數'],
+  ['audit_retention_general_days', '180', 'number', 'security', '一般稽核紀錄保留天數'],
+  ['audit_retention_last_run_at', '', 'string', 'security', '最近一次稽核清理時間（系統維護用）'],
 ];
 
 const obsoleteSettingKeys = new Set([

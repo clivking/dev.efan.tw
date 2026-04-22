@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdmin, AuthenticatedRequest } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/prisma';
+import { SECURITY_SETTING_DEFAULTS } from '@/lib/security-settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,7 @@ const REQUIRED_SETTING_DEFAULTS = [
   { key: 'warranty_stamp_url', value: '', type: 'string', category: 'company', description: '保固章圖片' },
   { key: 'default_customer_note', value: '', type: 'string', category: 'document', description: '客戶備註預設文字（顯示在 PDF）' },
   { key: 'warranty_terms', value: '', type: 'string', category: 'document', description: '保固書條款內容（支援多行，顯示在保固 PDF）' },
+  ...SECURITY_SETTING_DEFAULTS,
 ] as const;
 
 export async function GET(request: NextRequest) {

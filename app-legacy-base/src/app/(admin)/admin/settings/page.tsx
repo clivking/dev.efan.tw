@@ -57,7 +57,30 @@ type AuditLog = {
   tableName: string;
   recordLabel: string | null;
   createdAt: string;
+  category?: 'security' | 'business' | 'system' | 'public';
+  severity?: 'info' | 'warning' | 'critical';
+  summary?: string;
+  ipAddress?: string | null;
+  after?: Record<string, unknown> | null;
   user?: { name?: string | null; username?: string | null } | null;
+};
+
+type AuditFilters = {
+  category: string;
+  severity: string;
+  query: string;
+};
+
+type AuthSession = {
+  id: string;
+  createdAt: string;
+  expiresAt: string;
+  lastSeenAt: string;
+  revokedAt: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  lastSeenIp: string | null;
+  lastSeenUserAgent: string | null;
 };
 
 const HIDDEN_KEYS = new Set([
@@ -149,6 +172,11 @@ export default function SettingsPage() {
   const [webhookInfo, setWebhookInfo] = useState<WebhookInfo | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [auditLoading, setAuditLoading] = useState(false);
+  const [auditTotal, setAuditTotal] = useState(0);
+  const [auditFilters, setAuditFilters] = useState<AuditFilters>({ category: '', severity: '', query: '' });
+  const [authSessions, setAuthSessions] = useState<AuthSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState('company');
@@ -169,13 +197,26 @@ export default function SettingsPage() {
     if (tab === 'notify') {
       void fetchWebhookInfo();
     }
+  });
+
+  useEffect(() => {
+    handleTabSideEffects();
+  }, [tab]);
+
+  const handleAuditFilterEffects = useEffectEvent(() => {
     if (tab === 'audit') {
       void fetchAuditLogs();
     }
   });
 
   useEffect(() => {
-    handleTabSideEffects();
+    handleAuditFilterEffects();
+  }, [tab, auditFilters.category, auditFilters.severity, auditFilters.query]);
+
+  useEffect(() => {
+    if (tab === 'security') {
+      void fetchAuthSessions();
+    }
   }, [tab]);
 
   const current = NAV.find((item) => item.id === tab) || NAV[0];
@@ -259,16 +300,65 @@ export default function SettingsPage() {
   async function fetchAuditLogs() {
     setAuditLoading(true);
     try {
-      const res = await fetch('/api/audit?limit=20');
+      const params = new URLSearchParams({ limit: '50' });
+      if (auditFilters.category) params.set('category', auditFilters.category);
+      if (auditFilters.severity) params.set('severity', auditFilters.severity);
+      if (auditFilters.query) params.set('q', auditFilters.query);
+      const res = await fetch(`/api/audit?${params.toString()}`);
       const data = await res.json().catch(() => ({ logs: [] }));
       if (!res.ok) throw new Error(data.error || '無法載入稽核紀錄。');
       setAuditLogs(data.logs || []);
+      setAuditTotal(data.total || 0);
     } catch (error: any) {
       console.error(error);
       setMessage({ type: 'error', text: error?.message || '無法載入稽核紀錄。' });
     } finally {
       setAuditLoading(false);
     }
+  }
+
+  async function fetchAuthSessions() {
+    setSessionLoading(true);
+    try {
+      const res = await fetch('/api/auth/sessions');
+      const data = await res.json().catch(() => ({ sessions: [] }));
+      if (!res.ok) throw new Error(data.error || '無法載入登入裝置。');
+      setAuthSessions(data.sessions || []);
+      setCurrentSessionId(data.currentSessionId || null);
+    } catch (error: any) {
+      console.error(error);
+      setMessage({ type: 'error', text: error?.message || '無法載入登入裝置。' });
+    } finally {
+      setSessionLoading(false);
+    }
+  }
+
+  async function revokeSession(sessionId: string) {
+    try {
+      const res = await fetch('/api/auth/sessions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || '無法撤銷登入裝置。');
+      await fetchAuthSessions();
+      if (sessionId === currentSessionId) window.location.href = '/login';
+    } catch (error: any) {
+      console.error(error);
+      setMessage({ type: 'error', text: error?.message || '無法撤銷登入裝置。' });
+    }
+  }
+
+  async function revokeOtherSessions() {
+    const res = await fetch('/api/auth/sessions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ revokeOthers: true }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || '無法撤銷其他登入裝置。');
+    await fetchAuthSessions();
   }
 
   function updateValue(key: string, value: string) {
@@ -400,7 +490,21 @@ export default function SettingsPage() {
             ) : tab === 'seo' ? (
               <SeoLogTab settingsContent={<SettingsList categories={[...current.categories]} settings={settings} dirty={dirty} models={models} modelLoading={modelLoading} onRefreshModels={fetchModels} onChange={updateValue} onUploadImage={uploadImage} busyAction={busyAction} onRunAction={runAction} getCurrentValue={getCurrentValue} />} />
             ) : tab === 'audit' ? (
-              <Section title="稽核紀錄"><AuditPanel logs={auditLogs} loading={auditLoading} onRefresh={fetchAuditLogs} /></Section>
+              <Section title="稽核紀錄"><AuditPanel logs={auditLogs} loading={auditLoading} total={auditTotal} filters={auditFilters} onChangeFilters={setAuditFilters} onRefresh={fetchAuditLogs} /></Section>
+            ) : tab === 'security' ? (
+              <Section title="安全與 API">
+                <ActionGrid
+                  actions={[
+                    { key: 'refresh-security', label: '重新整理裝置', description: '讀取目前登入中的管理後台裝置。', busy: sessionLoading, onClick: () => runAction('refresh-security', async () => { await fetchAuthSessions(); return '登入裝置已更新。'; }) },
+                    { key: 'revoke-others', label: '登出其他裝置', description: '保留目前裝置，撤銷同帳號其他登入中的 session。', busy: busyAction === 'revoke-others', onClick: () => runAction('revoke-others', async () => { await revokeOtherSessions(); return '其他登入裝置已撤銷。'; }) },
+                    { key: 'run-audit-retention', label: '立即清理稽核', description: '依保留天數設定清理舊的稽核紀錄與過期 session。', busy: busyAction === 'run-audit-retention', onClick: () => runAction('run-audit-retention', async () => { const res = await fetch('/api/audit/retention', { method: 'POST' }); const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || '稽核清理失敗。'); await Promise.all([fetchAuditLogs(), fetchAuthSessions()]); return `已清理安全 ${data.deletedSecurity || 0} 筆、一般 ${data.deletedGeneral || 0} 筆、session ${data.deletedSessions || 0} 筆。`; }) },
+                  ]}
+                />
+                <SecuritySessionPanel sessions={authSessions} currentSessionId={currentSessionId} loading={sessionLoading} onRefresh={fetchAuthSessions} onRevokeSession={revokeSession} />
+                <div className="mt-8">
+                  <SettingsList categories={['security', 'api']} settings={settings} dirty={dirty} models={models} modelLoading={modelLoading} onRefreshModels={fetchModels} onChange={updateValue} onUploadImage={uploadImage} busyAction={busyAction} onRunAction={runAction} getCurrentValue={getCurrentValue} />
+                </div>
+              </Section>
             ) : tab === 'ai' ? (
               <Section title="AI 智能">
                 <UsagePanel usageCards={usageCards} lastEventAt={usage?.lastEventAt || null} />
@@ -573,19 +677,42 @@ function WebhookCard({ info }: { info: WebhookInfo | null }) {
 function AuditPanel({
   logs,
   loading,
+  total,
+  filters,
+  onChangeFilters,
   onRefresh,
 }: {
   logs: AuditLog[];
   loading: boolean;
+  total: number;
+  filters: AuditFilters;
+  onChangeFilters: React.Dispatch<React.SetStateAction<AuditFilters>>;
   onRefresh: () => Promise<void>;
 }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">{'\u6700\u8fd1 20 \u7b46\u7a3d\u6838\u7d00\u9304\u3002'}</div>
+        <div className="text-sm text-gray-500">{`共 ${total} 筆稽核紀錄。`}</div>
         <button type="button" onClick={() => { void onRefresh(); }} disabled={loading} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 disabled:opacity-50">
           {loading ? '\u66f4\u65b0\u4e2d...' : '\u91cd\u65b0\u6574\u7406'}
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <select value={filters.category} onChange={(event) => onChangeFilters((prev) => ({ ...prev, category: event.target.value }))} className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700">
+          <option value="">全部類別</option>
+          <option value="security">安全</option>
+          <option value="business">業務</option>
+          <option value="system">系統</option>
+          <option value="public">公開</option>
+        </select>
+        <select value={filters.severity} onChange={(event) => onChangeFilters((prev) => ({ ...prev, severity: event.target.value }))} className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700">
+          <option value="">全部級別</option>
+          <option value="critical">Critical</option>
+          <option value="warning">Warning</option>
+          <option value="info">Info</option>
+        </select>
+        <input value={filters.query} onChange={(event) => onChangeFilters((prev) => ({ ...prev, query: event.target.value }))} className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700" placeholder="搜尋帳號、IP、動作" />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-100">
@@ -593,10 +720,10 @@ function AuditPanel({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-gray-500">{'\u6642\u9593'}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-500">{'類別'}</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-500">{'\u4f7f\u7528\u8005'}</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-500">{'\u52d5\u4f5c'}</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-500">{'\u8cc7\u6599\u8868'}</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-500">{'\u7d00\u9304'}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-500">{'摘要'}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-500">{'IP / 裝置'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
@@ -606,15 +733,90 @@ function AuditPanel({
               logs.map((log) => (
                 <tr key={log.id}>
                   <td className="px-4 py-3 text-gray-500">{new Date(log.createdAt).toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    <div className={`inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${
+                      log.severity === 'critical' ? 'bg-red-50 text-red-700' :
+                      log.severity === 'warning' ? 'bg-amber-50 text-amber-700' :
+                      'bg-slate-100 text-slate-600'
+                    }`}>
+                      {`${log.category || 'system'} / ${log.severity || 'info'}`}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-gray-700">{log.user?.name || log.user?.username || '系統'}</td>
-                  <td className="px-4 py-3 font-semibold text-gray-800">{log.action}</td>
-                  <td className="px-4 py-3 text-gray-500">{log.tableName}</td>
-                  <td className="px-4 py-3 text-gray-500">{log.recordLabel || '-'}</td>
+                  <td className="px-4 py-3 text-gray-500">
+                    <div className="font-semibold text-gray-800">{log.summary || log.recordLabel || '-'}</div>
+                    <div className="mt-1 text-xs text-gray-400">{`${log.tableName} / ${log.action}`}</div>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-500">
+                    <div>{log.ipAddress || '-'}</div>
+                    <div className="mt-1 break-all text-[11px] text-gray-400">
+                      {typeof log.after?.userAgent === 'string' ? log.after.userAgent : '-'}
+                    </div>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+function SecuritySessionPanel({
+  sessions,
+  currentSessionId,
+  loading,
+  onRefresh,
+  onRevokeSession,
+}: {
+  sessions: AuthSession[];
+  currentSessionId: string | null;
+  loading: boolean;
+  onRefresh: () => Promise<void>;
+  onRevokeSession: (sessionId: string) => Promise<void>;
+}) {
+  return (
+    <div className="mt-8 space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-sm font-bold text-gray-800">登入裝置管理</div>
+          <div className="text-sm text-gray-500">可查看目前帳號的活躍 session，必要時撤銷裝置登入。</div>
+        </div>
+        <button type="button" onClick={() => { void onRefresh(); }} disabled={loading} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 disabled:opacity-50">
+          {loading ? '更新中...' : '重新整理'}
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {sessions.length === 0 ? (
+          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-8 text-center text-sm text-gray-400">
+            {loading ? '載入登入裝置中...' : '目前沒有登入裝置。'}
+          </div>
+        ) : sessions.map((session) => {
+          const isCurrent = session.id === currentSessionId;
+          const revoked = !!session.revokedAt;
+          return (
+            <div key={session.id} className={`rounded-2xl border px-4 py-4 ${isCurrent ? 'border-efan-primary/30 bg-efan-primary/5' : 'border-gray-100 bg-white'}`}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-800">{isCurrent ? '目前裝置' : '登入裝置'}</span>
+                    {revoked && <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700">已撤銷</span>}
+                  </div>
+                  <div>{`建立：${new Date(session.createdAt).toLocaleString()}`}</div>
+                  <div>{`最近活動：${new Date(session.lastSeenAt).toLocaleString()}`}</div>
+                  <div>{`到期：${new Date(session.expiresAt).toLocaleString()}`}</div>
+                  <div className="break-all text-xs text-gray-500">{session.lastSeenIp || session.ipAddress || '-'}</div>
+                  <div className="break-all text-xs text-gray-400">{session.lastSeenUserAgent || session.userAgent || '-'}</div>
+                </div>
+                <button type="button" disabled={revoked} onClick={() => { void onRevokeSession(session.id); }} className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 disabled:opacity-40">
+                  {isCurrent ? '登出此裝置' : '撤銷裝置'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

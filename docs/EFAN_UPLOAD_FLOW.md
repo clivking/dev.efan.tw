@@ -176,6 +176,9 @@ After sync into `dev`, validate:
 5. quote totals and items render correctly
 6. product pages and unreleased product content still exist
 7. uploads referenced by synced customer or quote records still resolve
+8. encrypted settings still decrypt correctly in `dev`
+9. Telegram test send succeeds if Telegram notifications are enabled in `dev`
+10. do not register Telegram webhook from `dev`; if the bot is shared with `www`, keep the webhook owned by `www`
 
 The user confirms this step before moving to `pre`.
 
@@ -246,6 +249,7 @@ After deploy to `pre`, validate:
 5. quote pages load
 6. AI and Telegram integrations read settings without decryption errors
 7. key uploads resolve
+8. do not register Telegram webhook from `pre`; if the bot is shared with `www`, keep the webhook owned by `www`
 
 Current smoke-check entrypoint:
 
@@ -287,6 +291,7 @@ The production-safe target is:
 - promote code and release-approved content changes
 - preserve `www` as the source of truth for live customer and quote records
 - promote release-owned content from `pre` to `www`
+- keep Telegram webhook ownership on `www` when `dev` or `pre` share the same bot token
 
 For this project, treat these as release-owned content authored in `dev` and promoted through `pre`:
 

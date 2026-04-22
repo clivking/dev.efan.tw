@@ -49,6 +49,7 @@ type ResourceLink = {
 };
 
 const GUIDE_LINKS: ResourceLink[] = [
+  { href: '/guides/access-control-system-pricing', label: '門禁系統價格怎麼算', note: '先抓預算區間，再看施工與維護成本。', badge: 'NEW' },
   { href: '/guides/2026-access-control-tco-analysis', label: '2026 門禁 TCO 採購分析', note: '從五年總成本角度看門禁投資。', badge: 'HOT' },
   { href: '/guides/office-access-control-upgrade-guide', label: '辦公室門禁升級指引', note: '適合評估舊系統該修還是該換。' },
   { href: '/guides/intercom-upgrade-comparison', label: '對講機升級評比', note: '整理對講、門口機與升級差異。' },

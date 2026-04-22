@@ -26,6 +26,7 @@ services:
       - ./app-legacy-base/.env.compose-prod
     volumes:
       - ./app-legacy-base/public/uploads:/app/public/uploads
+      - ./app-legacy-base/storage/private:/app/storage/private
 
   cloudflared:
     image: cloudflare/cloudflared:2025.8.1

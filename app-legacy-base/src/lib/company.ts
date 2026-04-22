@@ -1,4 +1,3 @@
-import { unstable_cache } from 'next/cache';
 import { getSettings } from './settings';
 
 export interface CompanyInfo {
@@ -51,50 +50,42 @@ const FALLBACK: CompanyInfo = {
     faviconUrl: '/favicon.ico',
 };
 
-// Cache company info for 1 hour across ALL requests (not per-request)
-const getCachedCompanyInfo = unstable_cache(
-    async (): Promise<CompanyInfo> => {
-        try {
-            const keys = [
-                'company_name', 'company_name_en', 'company_phone',
-                'company_email', 'company_address', 'company_logo_url',
-                'company_description', 'tax_id', 'completed_case_count',
-                'site_title_suffix', 'pdf_logo_url', 'ga4_measurement_id', 'company_favicon_url',
-                'google_rating', 'google_reviews'
-            ];
-            const settings = await getSettings(keys);
-            return {
-                name: settings['company_name'] || FALLBACK.name,
-                nameEn: settings['company_name_en'] || FALLBACK.nameEn,
-                phone: settings['company_phone'] || FALLBACK.phone,
-                email: settings['company_email'] || FALLBACK.email,
-                address: settings['company_address'] || FALLBACK.address,
-                tagline: syncYearsInMarketingCopy(settings['company_description'] || FALLBACK.tagline),
-                logoUrl: settings['company_logo_url'] || FALLBACK.logoUrl,
-                taxId: settings['tax_id'] || FALLBACK.taxId,
-                foundedYear: FOUNDED_YEAR,
-                yearsInBusiness: CURRENT_YEARS_IN_BUSINESS,
-                clientCount: Number(settings['completed_case_count'] || FALLBACK.clientCount),
-                googleRating: Number(settings['google_rating'] || FALLBACK.googleRating),
-                googleReviews: Number(settings['google_reviews'] || FALLBACK.googleReviews),
-                siteTitleSuffix: settings['site_title_suffix'] || FALLBACK.siteTitleSuffix,
-                pdfLogoUrl: settings['pdf_logo_url'] || '',
-                ga4Id: settings['ga4_measurement_id'] || '',
-                faviconUrl: settings['company_favicon_url'] || FALLBACK.faviconUrl,
-            };
-        } catch (error) {
-            console.error('[Company] DB fetch failed, using fallback:', error);
-            return FALLBACK;
-        }
-    },
-    ['company-info'],
-    { revalidate: 3600, tags: ['company'] }
-);
-
 export async function getCompanyInfo(): Promise<CompanyInfo> {
     // During build phase (no DB available), return fallback directly
     if (process.env.NEXT_PHASE === 'phase-production-build') {
         return FALLBACK;
     }
-    return getCachedCompanyInfo();
+
+    try {
+        const keys = [
+            'company_name', 'company_name_en', 'company_phone',
+            'company_email', 'company_address', 'company_logo_url',
+            'company_description', 'tax_id', 'completed_case_count',
+            'site_title_suffix', 'pdf_logo_url', 'ga4_measurement_id', 'company_favicon_url',
+            'google_rating', 'google_reviews'
+        ];
+        const settings = await getSettings(keys);
+        return {
+            name: settings['company_name'] || FALLBACK.name,
+            nameEn: settings['company_name_en'] || FALLBACK.nameEn,
+            phone: settings['company_phone'] || FALLBACK.phone,
+            email: settings['company_email'] || FALLBACK.email,
+            address: settings['company_address'] || FALLBACK.address,
+            tagline: syncYearsInMarketingCopy(settings['company_description'] || FALLBACK.tagline),
+            logoUrl: settings['company_logo_url'] || FALLBACK.logoUrl,
+            taxId: settings['tax_id'] || FALLBACK.taxId,
+            foundedYear: FOUNDED_YEAR,
+            yearsInBusiness: CURRENT_YEARS_IN_BUSINESS,
+            clientCount: Number(settings['completed_case_count'] || FALLBACK.clientCount),
+            googleRating: Number(settings['google_rating'] || FALLBACK.googleRating),
+            googleReviews: Number(settings['google_reviews'] || FALLBACK.googleReviews),
+            siteTitleSuffix: settings['site_title_suffix'] || FALLBACK.siteTitleSuffix,
+            pdfLogoUrl: settings['pdf_logo_url'] || '',
+            ga4Id: settings['ga4_measurement_id'] || '',
+            faviconUrl: settings['company_favicon_url'] || FALLBACK.faviconUrl,
+        };
+    } catch (error) {
+        console.error('[Company] DB fetch failed, using fallback:', error);
+        return FALLBACK;
+    }
 }

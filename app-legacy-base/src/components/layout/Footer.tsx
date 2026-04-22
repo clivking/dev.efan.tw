@@ -6,6 +6,7 @@ import type { CompanyInfo } from '@/lib/company';
 import { shouldBypassImageOptimization } from '@/lib/image-paths';
 
 const GUIDE_FOOTER_LINKS = [
+  { href: '/guides/access-control-system-pricing', label: '門禁系統價格怎麼算' },
   { href: '/guides/2026-access-control-tco-analysis', label: '2026 門禁 TCO 採購分析' },
   { href: '/guides/office-access-control-upgrade-guide', label: '辦公室門禁升級指引' },
   { href: '/guides/cloud-vs-onprem-pbx', label: '雲端與實體總機差異' },

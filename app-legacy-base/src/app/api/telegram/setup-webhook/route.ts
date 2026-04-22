@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdmin } from '@/lib/middleware/auth';
 import { getSetting } from '@/lib/settings';
 import { prisma } from '@/lib/prisma';
-import { getOriginFromRequest } from '@/lib/site-url';
+import { getOriginFromRequest, getSiteContextFromRequest } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,6 +63,16 @@ async function telegramRequest(botToken: string, method: string, body?: Record<s
 export async function POST(request: NextRequest) {
   return withAdmin(request, async () => {
     try {
+      const site = getSiteContextFromRequest(request);
+      if (site.stage !== 'www') {
+        return NextResponse.json(
+          {
+            error: `目前環境是 ${site.host}，不允許在非 www 環境註冊 Telegram webhook。這支 bot 的 webhook 是全域唯一，請改在 https://www.efan.tw/admin/settings 設定。`,
+          },
+          { status: 400 },
+        );
+      }
+
       const botToken = await getSetting('telegram_bot_token', '');
       if (!botToken) {
         return NextResponse.json({ error: '尚未設定 Telegram bot token。' }, { status: 400 });

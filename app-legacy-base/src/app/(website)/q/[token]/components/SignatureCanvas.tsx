@@ -30,20 +30,7 @@ const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasProps>((pr
     const [isDrawing, setIsDrawing] = useState(false);
     const [strokes, setStrokes] = useState<Stroke[]>([]);
     const [currentStroke, setCurrentStroke] = useState<Stroke>([]);
-
-    const redraw = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        // Clear and redraw all strokes
-        ctx.clearRect(0, 0, width, height);
-
-        // We need to use the latest strokes state, but since this might be called in Effect, 
-        // it's better to pass it or use a ref for drawing if performance is an issue.
-        // For now, we'll rely on the state-based redraw logic below.
-    }, [height, width]);
+    const [importedDataUrl, setImportedDataUrl] = useState<string | null>(null);
 
     // Setup canvas high-DPI support
     useEffect(() => {
@@ -66,9 +53,7 @@ const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasProps>((pr
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // Redraw if orientation/DPI changes or initial load
-        redraw();
-    }, [height, redraw, width]);
+    }, [height, width]);
 
     // Redraw when strokes change
     useEffect(() => {
@@ -77,18 +62,30 @@ const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasProps>((pr
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        const drawStrokes = () => {
+            strokes.forEach(stroke => drawStroke(ctx, stroke));
+
+            if (currentStroke.length > 0) {
+                drawStroke(ctx, currentStroke);
+            }
+        };
+
         ctx.clearRect(0, 0, width, height);
 
-        // Draw past strokes
-        strokes.forEach(stroke => drawStroke(ctx, stroke));
-
-        // Draw current stroke
-        if (currentStroke.length > 0) {
-            drawStroke(ctx, currentStroke);
+        if (importedDataUrl) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                drawStrokes();
+            };
+            img.src = importedDataUrl;
+        } else {
+            drawStrokes();
         }
 
-        onSignatureChange?.(strokes.length > 0 || currentStroke.length > 0);
-    }, [currentStroke, height, onSignatureChange, strokes, width]);
+        onSignatureChange?.(Boolean(importedDataUrl) || strokes.length > 0 || currentStroke.length > 0);
+    }, [currentStroke, height, importedDataUrl, onSignatureChange, strokes, width]);
 
     const drawStroke = (ctx: CanvasRenderingContext2D, points: Point[]) => {
         if (points.length < 2) return;
@@ -144,38 +141,34 @@ const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasProps>((pr
 
     useImperativeHandle(ref, () => ({
         toDataURL: () => {
+            if (importedDataUrl && strokes.length === 0 && currentStroke.length === 0) {
+                return importedDataUrl;
+            }
             const canvas = canvasRef.current;
             if (!canvas) return '';
             return canvas.toDataURL('image/png');
         },
         clear: () => {
+            setImportedDataUrl(null);
             setStrokes([]);
             setCurrentStroke([]);
         },
         undo: () => {
-            setStrokes(prev => prev.slice(0, -1));
+            if (strokes.length > 0) {
+                setStrokes(prev => prev.slice(0, -1));
+            } else {
+                setImportedDataUrl(null);
+            }
         },
         isEmpty: () => {
-            return strokes.length === 0 && currentStroke.length === 0;
+            return !importedDataUrl && strokes.length === 0 && currentStroke.length === 0;
         },
         fromDataURL: (dataUrl: string) => {
-            const canvas = canvasRef.current;
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            const img = new Image();
-            img.onload = () => {
-                ctx.clearRect(0, 0, width, height);
-                // Draw the image scaled to fit
-                ctx.drawImage(img, 0, 0, width, height);
-                // Note: This won't populate the "strokes" state, 
-                // but it will show correctly and and toDataURL will work.
-                onSignatureChange?.(true);
-            };
-            img.src = dataUrl;
+            setImportedDataUrl(dataUrl);
+            setStrokes([]);
+            setCurrentStroke([]);
         }
-    }));
+    }), [currentStroke.length, importedDataUrl, strokes.length]);
 
     return (
         <canvas

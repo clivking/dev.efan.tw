@@ -38,6 +38,13 @@ export const GUIDE_TOPIC_CONFIGS: GuideTopicConfig[] = [
   },
 ];
 
+const TOPIC_ALIASES: Record<string, string> = {
+  access: 'access-control',
+  cctv: 'security',
+  surveillance: 'security',
+  pbx: 'phone-system',
+};
+
 const TOPIC_MATCHERS: Array<{ key: string; matches: string[] }> = [
   { key: 'access-control', matches: ['門禁', 'access', 'card', 'reader'] },
   { key: 'intercom', matches: ['對講', '門口機', 'intercom', 'akuvox'] },
@@ -55,5 +62,6 @@ export function getGuideTopicKey(topic: string | null) {
 
 export function getGuideTopicConfig(topicKey: string | null) {
   if (!topicKey) return null;
-  return GUIDE_TOPIC_CONFIGS.find((item) => item.key === topicKey) || null;
+  const normalizedKey = TOPIC_ALIASES[topicKey] || topicKey;
+  return GUIDE_TOPIC_CONFIGS.find((item) => item.key === normalizedKey) || null;
 }

@@ -244,55 +244,79 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
 
 export async function DELETE(request: NextRequest, { params }: { params: any }) {
     return withAuth(request, async (req: AuthenticatedRequest) => {
-        const { id } = await params;
-        const { searchParams } = new URL(request.url);
-        const deleteQuotes = searchParams.get('deleteQuotes') === 'true';
+        try {
+            const { id } = await params;
+            const { searchParams } = new URL(request.url);
+            const deleteQuotes = searchParams.get('deleteQuotes') === 'true';
 
-        const old = await prisma.customer.findUnique({
-            where: { id },
-            include: {
-                companyNames: true, contacts: true, locations: true,
-                quotes: { select: { id: true, quoteNumber: true } }
-            },
-        });
-        if (!old) return NextResponse.json({ error: '找不到客戶' }, { status: 404 });
-
-        const quoteIds = old.quotes.map(q => q.id);
-
-        if (deleteQuotes && quoteIds.length > 0) {
-            // Delete all quotes and their items
-            await prisma.$transaction([
-                prisma.quoteItem.deleteMany({ where: { quoteId: { in: quoteIds } } }),
-                prisma.quote.deleteMany({ where: { parentQuoteId: { in: quoteIds } } }),
-                prisma.quote.deleteMany({ where: { customerId: id } }),
-            ]);
-        } else if (quoteIds.length > 0) {
-            // Detach quotes from customer (keep as snapshots)
-            await prisma.quote.updateMany({
-                where: { customerId: id },
-                data: { customerId: null, companyNameId: null, locationId: null },
+            const old = await prisma.customer.findUnique({
+                where: { id },
+                include: {
+                    companyNames: true,
+                    contacts: true,
+                    locations: true,
+                    portalUsers: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            status: true,
+                        },
+                    },
+                    quotes: { select: { id: true, quoteNumber: true } }
+                },
             });
+            if (!old) return NextResponse.json({ error: '找不到客戶' }, { status: 404 });
+
+            const quoteIds = old.quotes.map(q => q.id);
+
+            if (deleteQuotes && quoteIds.length > 0) {
+                // Delete all quotes and their items
+                await prisma.$transaction([
+                    prisma.quoteItem.deleteMany({ where: { quoteId: { in: quoteIds } } }),
+                    prisma.quote.deleteMany({ where: { parentQuoteId: { in: quoteIds } } }),
+                    prisma.quote.deleteMany({ where: { customerId: id } }),
+                ]);
+            } else if (quoteIds.length > 0) {
+                // Detach quotes from customer (keep as snapshots)
+                await prisma.quote.updateMany({
+                    where: { customerId: id },
+                    data: { customerId: null, companyNameId: null, locationId: null },
+                });
+            }
+
+            // Delete customer and related records
+            await prisma.$transaction([
+                prisma.contactRequest.deleteMany({ where: { customerId: id } }),
+                prisma.portalUser.deleteMany({ where: { customerId: id } }),
+                prisma.companyName.deleteMany({ where: { customerId: id } }),
+                prisma.contact.deleteMany({ where: { customerId: id } }),
+                prisma.location.deleteMany({ where: { customerId: id } }),
+                prisma.customer.delete({ where: { id } }),
+            ]);
+
+            await writeAudit({
+                userId: req.user!.id,
+                action: 'delete',
+                tableName: 'customers',
+                recordId: id,
+                before: old as any,
+                after: null,
+                ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+            });
+
+            return NextResponse.json({ success: true, deletedQuotes: deleteQuotes ? quoteIds.length : 0 });
+        } catch (error: any) {
+            console.error('[Delete Customer]', error);
+
+            if (error?.code === 'P2003') {
+                return NextResponse.json(
+                    { error: '此客戶仍有關聯資料未清除，暫時無法刪除。請先檢查客戶入口帳號或其他關聯記錄。' },
+                    { status: 400 }
+                );
+            }
+
+            return NextResponse.json({ error: '刪除客戶失敗' }, { status: 500 });
         }
-
-        // Delete customer and related records
-        await prisma.$transaction([
-            prisma.contactRequest.deleteMany({ where: { customerId: id } }),
-            prisma.companyName.deleteMany({ where: { customerId: id } }),
-            prisma.contact.deleteMany({ where: { customerId: id } }),
-            prisma.location.deleteMany({ where: { customerId: id } }),
-            prisma.customer.delete({ where: { id } }),
-        ]);
-
-        await writeAudit({
-            userId: req.user!.id,
-            action: 'delete',
-            tableName: 'customers',
-            recordId: id,
-            before: old as any,
-            after: null,
-            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        });
-
-        return NextResponse.json({ success: true, deletedQuotes: deleteQuotes ? quoteIds.length : 0 });
     });
 }

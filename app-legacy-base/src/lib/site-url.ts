@@ -29,6 +29,14 @@ function normalizeHost(rawHost: string | null | undefined) {
     return host.replace(/:\d+$/, '');
 }
 
+function normalizeOriginHost(rawHost: string | null | undefined) {
+    const fallbackHost = new URL(getFallbackOrigin()).host;
+    return (rawHost || fallbackHost)
+        .split(',')[0]
+        .trim()
+        .toLowerCase();
+}
+
 function normalizeProtocol(rawProtocol: string | null | undefined) {
     const protocol = (rawProtocol || 'https').trim().toLowerCase();
     return protocol === 'http' || protocol === 'https' ? protocol : 'https';
@@ -49,10 +57,11 @@ export function buildSiteContext(hostLike?: string | null, protocolLike?: string
     const host = normalizeHost(hostLike);
     const stage = getSiteStage(host);
     const protocol = stage === 'custom' ? normalizeProtocol(protocolLike) : 'https';
+    const originHost = stage === 'custom' ? normalizeOriginHost(hostLike) : host;
 
     return {
         host,
-        origin: `${protocol}://${host}`,
+        origin: `${protocol}://${originHost}`,
         stage,
         isIndexable: isIndexableHost(host),
     };

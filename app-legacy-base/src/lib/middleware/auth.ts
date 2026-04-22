@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { validateAuthSession } from '@/lib/auth-sessions';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +12,7 @@ export interface AuthenticatedRequest extends NextRequest {
         username: string;
         name: string;
         role: string;
+        sessionId?: string;
     };
 }
 
@@ -36,6 +38,10 @@ export async function withAuth(
         }
 
         const payload = await verifyToken(token);
+        if (!payload.sessionId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
             select: { id: true, username: true, name: true, role: true, isActive: true },
@@ -45,11 +51,17 @@ export async function withAuth(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const session = await validateAuthSession(payload.sessionId, user.id, request);
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         (request as AuthenticatedRequest).user = {
             id: user.id,
             username: user.username,
             name: user.name,
             role: user.role,
+            sessionId: payload.sessionId,
         };
 
         return handler(request as AuthenticatedRequest);
@@ -62,7 +74,7 @@ export async function withAuth(
  * Get the authenticated user from the request.
  * Must be called inside a withAuth handler where the request has been augmented.
  */
-export async function getAuthUser(request: NextRequest): Promise<{ id: string; username: string; name: string; role: string } | null> {
+export async function getAuthUser(request: NextRequest): Promise<{ id: string; username: string; name: string; role: string; sessionId?: string } | null> {
     const authReq = request as AuthenticatedRequest;
     return authReq.user || null;
 }

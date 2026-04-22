@@ -9,7 +9,10 @@ export const dynamic = 'force-dynamic';
 
 async function getQuoteData(token: string) {
     const site = await getRequestSiteContext();
-    const baseUrl = site.origin;
+    const serverPort = process.env.PORT || '3000';
+    const baseUrl = site.host === 'localhost' || site.host === '127.0.0.1'
+        ? `http://127.0.0.1:${serverPort}`
+        : site.origin;
     const res = await fetch(`${baseUrl}/api/public/q/${token}`, {
         cache: 'no-store'
     });

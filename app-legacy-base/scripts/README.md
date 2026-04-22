@@ -5,6 +5,11 @@ This folder contains the active maintenance scripts for the project.
 ## Canonical Entry Points
 
 - `check-db.ts`: lightweight DB connectivity and record-count check
+- `upsert-access-control-system-pricing-guide.ts`: upserts the primary `門禁系統價格` guide with SEO/AIO-ready content
+- `upsert-access-control-system-vendor-guide.ts`: upserts the primary `門禁系統廠商` guide with SEO/AIO/GEO-ready content
+- `upsert-cctv-guide-cluster.ts`: upserts the primary `監視與安防` guide cluster for installation, pricing, office planning, recommendation, and Taipei company selection
+- `upsert-cctv-guide-phase2.ts`: appends cross-links across the CCTV guide cluster and upserts the storage/focal/NVR planning hub guide
+- `upsert-cctv-guide-phase3.ts`: upserts the CCTV trust/scenario expansion set for office case-reading, FAQ/compliance, and retail-store planning
 - `check-uploads-integrity.mjs`: checks `uploaded_files` references against the local uploads filesystem
 - `audit-canonical-uploads.mjs`: inventories uploads, DB/source references, canonical product path violations, and cleanup candidates without moving or deleting files
 - `migrate-canonical-product-assets.mjs`: copies safe product assets to canonical paths and updates `uploaded_files` when run with `--apply`
@@ -24,6 +29,11 @@ This folder contains the active maintenance scripts for the project.
 ## Recommended npm Commands
 
 - `npm run script:check-db`
+- `npm run script:upsert-access-control-pricing-guide`
+- `npm run script:upsert-access-control-vendor-guide`
+- `npm run script:upsert-cctv-guide-cluster`
+- `npm run script:upsert-cctv-guide-phase2`
+- `npm run script:upsert-cctv-guide-phase3`
 - `npm run script:check-uploads`
 - `npm run script:fix-uploads-drift`
 - `npm run script:fix-uploads-docs`

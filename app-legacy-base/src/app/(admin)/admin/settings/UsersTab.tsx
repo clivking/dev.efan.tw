@@ -12,6 +12,7 @@ interface User {
     isActive: boolean;
     lastLoginAt: string | null;
     createdAt: string;
+    activeSessionCount: number;
 }
 
 interface AuthUser {
@@ -143,6 +144,25 @@ export default function UsersTab() {
         }
     };
 
+    const handleRevokeSessions = async (user: User) => {
+        if (!confirm(`確定要登出 ${user.name} 的全部裝置嗎？`)) return;
+        try {
+            const res = await fetch(`/api/users/${user.id}/sessions`, {
+                method: 'DELETE',
+            });
+            if (res.ok) {
+                const data = await res.json();
+                alert(`✅ 已撤銷 ${data.revokedCount || 0} 個 session`);
+                fetchUsers();
+            } else {
+                const err = await res.json();
+                alert(`❌ ${err.error}`);
+            }
+        } catch {
+            alert('❌ 撤銷 session 失敗');
+        }
+    };
+
     if (loading) {
         return <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-efan-primary" /></div>;
     }
@@ -197,7 +217,11 @@ export default function UsersTab() {
                                     <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">{user.role === 'admin' ? '管理員' : '員工'}</span>
                                     {!user.isActive && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-600">已停用</span>}
                                 </div>
-                                <div className="text-xs text-gray-400">@{user.username}{user.lastLoginAt && ` · 最後登入 ${new Date(user.lastLoginAt).toLocaleString('zh-TW')}`}</div>
+                                <div className="text-xs text-gray-400">
+                                    @{user.username}
+                                    {user.lastLoginAt && ` · 最後登入 ${new Date(user.lastLoginAt).toLocaleString('zh-TW')}`}
+                                    {` · 活躍裝置 ${user.activeSessionCount ?? 0}`}
+                                </div>
                             </div>
                         </div>
                         <div className="flex gap-1.5">
@@ -208,6 +232,10 @@ export default function UsersTab() {
                             <button onClick={() => handleToggleActive(user)}
                                 className={`px-2.5 py-1 text-xs rounded-lg transition-all font-medium ${user.isActive ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
                                 {user.isActive ? '⏸️ 停用登入' : '▶️ 恢復啟用'}
+                            </button>
+                            <button onClick={() => handleRevokeSessions(user)}
+                                className="px-2.5 py-1 text-xs bg-slate-50 text-slate-700 rounded-lg border border-slate-200 hover:bg-slate-100 transition-all font-medium">
+                                🔒 登出全部裝置
                             </button>
                             {authUser?.id !== user.id && (
                                 <button onClick={() => handleDelete(user)}

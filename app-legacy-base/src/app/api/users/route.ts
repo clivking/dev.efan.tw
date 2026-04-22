@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdmin } from '@/lib/middleware/auth';
 import { hashPassword } from '@/lib/auth';
+import { countActiveSessionsByUserIds } from '@/lib/auth-sessions';
+import { writeAudit } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +27,13 @@ export async function GET(request: NextRequest) {
             },
             orderBy: { createdAt: 'asc' },
         });
-        return NextResponse.json({ users });
+        const sessionCounts = await countActiveSessionsByUserIds(users.map((user) => user.id));
+        return NextResponse.json({
+            users: users.map((user) => ({
+                ...user,
+                activeSessionCount: sessionCounts.get(user.id) || 0,
+            })),
+        });
     });
 }
 
@@ -33,7 +41,7 @@ export async function GET(request: NextRequest) {
  * POST /api/users - Create new user (admin only)
  */
 export async function POST(request: NextRequest) {
-    return withAdmin(request, async () => {
+    return withAdmin(request, async (req) => {
         const body = await request.json();
         const { username, password, name, role, email, mobile } = body;
 
@@ -68,6 +76,20 @@ export async function POST(request: NextRequest) {
                 mobile: true,
                 isActive: true,
                 createdAt: true,
+            },
+        });
+
+        await writeAudit({
+            userId: req.user!.id,
+            action: 'create',
+            tableName: 'users',
+            recordId: user.id,
+            after: {
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                email: user.email,
+                mobile: user.mobile,
             },
         });
 

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import BreadcrumbTrail from '@/components/common/BreadcrumbTrail';
 import JsonLdScript from '@/components/common/JsonLdScript';
 import { toBreadcrumbSchemaItems, withHomeBreadcrumb } from '@/lib/breadcrumbs';
 import { buildBreadcrumbSchema } from '@/lib/structured-data';
@@ -68,15 +67,18 @@ export default function LoginPage() {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center p-4">
+        <>
+        <style jsx global>{`
+            main {
+                min-height: auto !important;
+            }
+        `}</style>
+        <div className="bg-gradient-to-br from-indigo-100 to-white flex items-start justify-center px-4 py-[70px]">
             <JsonLdScript data={breadcrumbSchema} />
             <div className="w-full max-w-sm">
-                <div className="mb-6">
-                    <BreadcrumbTrail items={breadcrumbs} tone="light" />
-                </div>
             <div className="bg-white max-w-sm w-full rounded-2xl shadow-xl overflow-hidden">
-                <div className="p-8 pb-6">
-                    <div className="flex justify-center mb-6">
+                <div className="p-5 pb-4">
+                    <div className="flex justify-center mb-4">
                         <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-xl shadow-lg flex items-center justify-center text-white text-2xl font-bold">
                             一帆
                         </div>
@@ -84,7 +86,7 @@ export default function LoginPage() {
                     <h1 className="text-2xl font-semibold text-center text-slate-800 mb-2">
                         一帆報價系統 V6
                     </h1>
-                    <p className="text-center text-slate-500 mb-8 text-sm">請輸入您的帳號密碼登入系統</p>
+                    <p className="text-center text-slate-500 mb-5 text-sm">請輸入您的帳號密碼登入系統</p>
 
                     {error && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center animate-pulse">
@@ -149,11 +151,12 @@ export default function LoginPage() {
                         </button>
                     </form>
                 </div>
-                <div className="bg-slate-50 border-t border-slate-100 p-4 text-center">
+                <div className="bg-slate-50 border-t border-slate-100 px-4 py-3 text-center">
                     <p className="text-xs text-slate-400">&copy; 2026 一帆報價系統. All rights reserved.</p>
                 </div>
             </div>
             </div>
         </div>
+        </>
     );
 }

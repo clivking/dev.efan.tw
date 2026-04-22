@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { withAuth, getAuthUser } from '@/lib/middleware/auth';
 import { hashPassword } from '@/lib/auth';
 import { SYSTEM_USER_ID } from '@/lib/system-user';
+import { deleteUserSessions, revokeUserSessions } from '@/lib/auth-sessions';
+import { writeAudit } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +32,8 @@ export async function PUT(
 
         const body = await request.json();
         const updateData: any = {};
+        const auditTasks: Array<() => Promise<void>> = [];
+        let revokeSessions = false;
 
         // Update name
         if (body.name !== undefined) updateData.name = body.name;
@@ -40,6 +44,16 @@ export async function PUT(
         // Update role (admin only, can't change yourself)
         if (body.role !== undefined && !isSelf && authUser?.role === 'admin') {
             updateData.role = body.role;
+            if (body.role !== user.role) {
+                auditTasks.push(() => writeAudit({
+                    userId: authUser.id,
+                    action: 'role_change',
+                    tableName: 'users',
+                    recordId: id,
+                    before: { role: user.role },
+                    after: { role: body.role, username: user.username },
+                }));
+            }
         }
         // Toggle active (admin only, can't deactivate yourself)
         if (body.isActive !== undefined && !isSelf && authUser?.role === 'admin') {
@@ -56,6 +70,17 @@ export async function PUT(
                 }
             }
             updateData.isActive = body.isActive;
+            if (body.isActive !== user.isActive) {
+                auditTasks.push(() => writeAudit({
+                    userId: authUser.id,
+                    action: 'status_change',
+                    tableName: 'users',
+                    recordId: id,
+                    before: { isActive: user.isActive },
+                    after: { isActive: body.isActive, username: user.username },
+                }));
+                if (body.isActive === false) revokeSessions = true;
+            }
         }
         // Change password
         if (body.password) {
@@ -63,6 +88,14 @@ export async function PUT(
                 return NextResponse.json({ error: '密碼至少需要 6 個字元' }, { status: 400 });
             }
             updateData.passwordHash = await hashPassword(body.password);
+            auditTasks.push(() => writeAudit({
+                userId: authUser!.id,
+                action: 'password_changed',
+                tableName: 'users',
+                recordId: id,
+                after: { username: user.username, changedBySelf: isSelf },
+            }));
+            revokeSessions = true;
         }
 
         const updated = await prisma.user.update({
@@ -80,6 +113,44 @@ export async function PUT(
                 createdAt: true,
             },
         });
+
+        if (Object.keys(updateData).some((key) => ['name', 'email', 'mobile'].includes(key))) {
+            auditTasks.push(() => writeAudit({
+                userId: authUser!.id,
+                action: 'update',
+                tableName: 'users',
+                recordId: id,
+                before: {
+                    name: user.name,
+                    email: user.email,
+                    mobile: user.mobile,
+                },
+                after: {
+                    name: updated.name,
+                    email: updated.email,
+                    mobile: updated.mobile,
+                    username: updated.username,
+                },
+            }));
+        }
+
+        if (revokeSessions) {
+            const revokedCount = await revokeUserSessions(id, isSelf ? authUser?.sessionId || null : null);
+            auditTasks.push(() => writeAudit({
+                userId: authUser!.id,
+                action: 'session_revoked',
+                tableName: 'auth_sessions',
+                recordId: authUser?.sessionId || id,
+                after: {
+                    scope: isSelf ? 'others' : 'user_all',
+                    targetUserId: id,
+                    targetUsername: user.username,
+                    revokedCount,
+                },
+            }));
+        }
+
+        await Promise.all(auditTasks.map((task) => task()));
 
         return NextResponse.json({ user: updated });
     });
@@ -107,7 +178,7 @@ export async function DELETE(
 
         const user = await prisma.user.findUnique({
             where: { id },
-            select: { id: true, role: true, isActive: true },
+            select: { id: true, username: true, role: true, isActive: true },
         });
 
         if (!user) {
@@ -167,6 +238,19 @@ export async function DELETE(
             await tx.user.delete({
                 where: { id },
             });
+        });
+
+        await deleteUserSessions(id);
+        await writeAudit({
+            userId: authUser.id,
+            action: 'delete',
+            tableName: 'users',
+            recordId: id,
+            before: {
+                username: user.username,
+                role: user.role,
+                isActive: user.isActive,
+            },
         });
 
         return NextResponse.json({ success: true });

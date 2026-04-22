@@ -21,19 +21,26 @@ interface MonthlyRevenueChartProps {
     data: MonthlyTrendData[];
 }
 
+const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('zh-TW', {
+        style: 'currency',
+        currency: 'TWD',
+        minimumFractionDigits: 0,
+    }).format(Math.round(value));
+
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-        const revenue = payload[0].value;
-        const cost = payload[1].value;
-        const profit = revenue - cost;
+        const revenue = Number(payload.find((item: any) => item.dataKey === 'revenue')?.value || 0);
+        const cost = Number(payload.find((item: any) => item.dataKey === 'cost')?.value || 0);
+        const profit = Number(payload.find((item: any) => item.dataKey === 'profit')?.value || 0);
 
         return (
             <div className="bg-white p-4 border border-gray-100 shadow-xl rounded-2xl">
                 <p className="font-black text-gray-900 mb-2 border-bottom pb-1">{label}</p>
-                <p className="text-sm font-bold text-blue-600">營收: ${revenue.toLocaleString()}</p>
-                <p className="text-sm font-bold text-gray-400">成本: ${cost.toLocaleString()}</p>
+                <p className="text-sm font-bold text-blue-600">營收: {formatCurrency(revenue)}</p>
+                <p className="text-sm font-bold text-amber-500">成本: {formatCurrency(cost)}</p>
                 <div className="mt-2 pt-2 border-t border-gray-50">
-                    <p className="text-sm font-black text-green-600">毛利: ${profit.toLocaleString()}</p>
+                    <p className="text-sm font-black text-emerald-600">淨利: {formatCurrency(profit)}</p>
                 </div>
             </div>
         );
@@ -100,7 +107,8 @@ export default function MonthlyRevenueChart({ loading, data }: MonthlyRevenueCha
                             wrapperStyle={{ paddingBottom: 20, fontSize: 12, fontWeight: 700 }}
                         />
                         <Bar dataKey="revenue" name="營收" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={24} />
-                        <Bar dataKey="cost" name="成本" fill="#D1D5DB" radius={[4, 4, 0, 0]} barSize={24} />
+                        <Bar dataKey="cost" name="成本" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={24} />
+                        <Bar dataKey="profit" name="淨利" fill="#10B981" radius={[4, 4, 0, 0]} barSize={24} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
